@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASEZERO | Contact Us</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+<header>
+    <h1>CASEZERO</h1>
+    <nav>
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/signup}">Sign Up</a>
+        <a th:href="@{/login}">Sign In</a>
+        <a th:href="@{/contact}">Contact Us</a>
+    </nav>
+</header>
+
+<main>
+    <section class="panel">
+        <h2>Contact Us</h2>
+        <p>
+            Have a question or feedback about CASEZERO?
+            Send us a message using the form below.
+        </p>
+
+        <form th:action="@{/contact}" method="post">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name"
+                   placeholder="Enter your full name"
+                   minlength="2" maxlength="80"
+                   autocomplete="name" required>
+
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email"
+                   placeholder="Enter your email"
+                   maxlength="254"
+                   autocomplete="email" required>
+
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" name="subject"
+                   placeholder="Enter message subject"
+                   minlength="3" maxlength="100" required>
+
+            <label for="message">Your Message</label>
+            <textarea id="message" name="message"
+                      placeholder="Write your message here"
+                      minlength="10" maxlength="2000"
+                      rows="5" required></textarea>
+
+            <button class="button" type="submit">Send Message</button>
+        </form>
+    </section>
+</main>
+
+<footer>
+    CASEZERO — Supporting awareness through public information.
+</footer>
+</body>
+</html>

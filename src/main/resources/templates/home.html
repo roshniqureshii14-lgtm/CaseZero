@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASEZERO | Home</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+<header>
+    <h1>CASEZERO</h1>
+    <nav>
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/signup}">Sign Up</a>
+        <a th:href="@{/login}">Sign In</a>
+        <a th:href="@{/contact}">Contact Us</a>
+    </nav>
+</header>
+
+<main>
+    <section class="hero">
+        <p>PUBLIC INFORMATION. UNRESOLVED CASES. SEEKING ANSWERS.</p>
+        <h2>Every Unresolved Case Deserves to Be Remembered.</h2>
+        <p>
+            CASEZERO is a public-information investigation platform
+            focused on missing persons, unidentified persons, and
+            unsolved cases in Pakistan.
+        </p>
+        <a class="button" th:href="@{/signup}">Join CASEZERO</a>
+    </section>
+</main>
+
+<footer>
+    CASEZERO — Supporting awareness through public information.
+</footer>
+</body>
+</html>
