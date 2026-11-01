@@ -22,9 +22,22 @@ public class SecurityConfig {
 
         http
             .authorizeHttpRequests(authorize -> authorize
-               .requestMatchers("/", "/signup", "/login", "/contact", "/style.css", "/images/**", "/error").permitAll()
+
+                // Public pages and resources
+                .requestMatchers(
+                        "/",
+                        "/signup",
+                        "/login",
+                        "/contact",
+                        "/style.css",
+                        "/images/**",
+                        "/error"
+                ).permitAll()
+
+                // Other routes require authentication
                 .anyRequest().authenticated()
             )
+
             .formLogin(login -> login
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
@@ -34,6 +47,7 @@ public class SecurityConfig {
                 .failureUrl("/login?error")
                 .permitAll()
             )
+
             .logout(logout -> logout
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()

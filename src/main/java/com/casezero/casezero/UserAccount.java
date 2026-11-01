@@ -2,6 +2,8 @@
 package com.casezero.casezero;
 
 import jakarta.persistence.*;
+import java.util.Locale;
+import java.util.UUID;
 
 @Entity
 @Table(name = "app_users")
@@ -23,7 +25,22 @@ public class UserAccount {
     @Column(nullable = false, length = 20)
     private String role = "USER";
 
+    // Public member ID. This is separate from the internal database ID.
+    @Column(name = "public_id", unique = true, length = 20)
+    private String publicId;
+
     public UserAccount() {
+    }
+
+    @PrePersist
+    public void generatePublicId() {
+        if (publicId == null || publicId.isBlank()) {
+            publicId = "CZ-" + UUID.randomUUID()
+                    .toString()
+                    .replace("-", "")
+                    .substring(0, 8)
+                    .toUpperCase(Locale.ROOT);
+        }
     }
 
     public Long getId() {
@@ -56,5 +73,13 @@ public class UserAccount {
 
     public String getRole() {
         return role;
+    }
+
+    public String getPublicId() {
+        return publicId;
+    }
+
+    public void setPublicId(String publicId) {
+        this.publicId = publicId;
     }
 }

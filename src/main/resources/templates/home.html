@@ -5,95 +5,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>CASEZERO | Unresolved Cases in Pakistan</title>
-
     <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 
 <body>
-
-<!-- HEADER -->
 
 <header>
     <h1>CASEZERO</h1>
 
     <nav>
         <a th:href="@{/}">Home</a>
-
-        <a th:href="@{/signup}" th:unless="${loggedIn}">
-            Sign Up
-        </a>
-
-        <a th:href="@{/login}" th:unless="${loggedIn}">
-            Sign In
-        </a>
-
         <a th:href="@{/contact}">Contact Us</a>
 
-        <!-- MEMBER ACCOUNT AREA -->
-
-        <div th:if="${loggedIn}" class="account-area">
-
-            <span class="account-status">
-                <span class="status-dot"></span>
-                Signed In
-            </span>
-
-            <span class="account-name"
-                  th:text="${username}">
-                Account
-            </span>
-
-            <form th:action="@{/logout}" method="post">
-                <button type="submit" class="header-logout">
-                    Sign Out
-                </button>
-            </form>
-
-        </div>
-
+        <a th:if="${!loggedIn}" th:href="@{/signup}">Register</a>
+        <a th:if="${!loggedIn}" th:href="@{/login}">Sign In</a>
     </nav>
 </header>
 
+<!-- GUEST AND MEMBER DASHBOARD -->
 
-<!-- MEMBER LAYOUT -->
+<div th:class="${loggedIn} ? 'member-layout' : 'guest-layout'">
 
-<div th:classappend="${loggedIn} ? ' member-layout' : ''">
+    <aside class="dashboard-sidebar">
 
-    <!-- SIDEBAR: MEMBERS ONLY -->
+        <!-- PROFILE CARD -->
 
-    <aside th:if="${loggedIn}" class="dashboard-sidebar">
+        <div class="sidebar-profile">
+
+            <div class="profile-avatar">
+                <span th:if="${loggedIn}"
+                      th:text="${#strings.substring(profileName, 0, 1)}">M</span>
+                <span th:unless="${loggedIn}">G</span>
+            </div>
+
+            <div class="profile-details">
+
+                <span class="profile-label"
+                      th:text="${loggedIn} ? 'MEMBER PROFILE' : 'GUEST PROFILE'">
+                    PROFILE
+                </span>
+
+                <strong class="profile-name"
+                        th:text="${profileName}">
+                    Guest Member
+                </strong>
+
+                <span class="profile-id"
+                      th:text="${publicId}">
+                    GUEST-XXXXXX
+                </span>
+
+                <span class="profile-status"
+                      th:text="${loggedIn} ? 'Registered Member' : 'Read-only Guest'">
+                    Read-only Guest
+                </span>
+
+            </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
 
         <p class="sidebar-heading">MY WORKSPACE</p>
 
-        <a href="#top" class="sidebar-link active">
-            Overview
-        </a>
-
-        <a href="#investigations" class="sidebar-link">
-            Explore Cases
-        </a>
+        <a href="#top" class="sidebar-link active">Overview</a>
+        <a href="#investigations" class="sidebar-link">Explore Cases</a>
+        <a href="#archive" class="sidebar-link">Case Archive</a>
 
         <div class="sidebar-divider"></div>
 
         <p class="sidebar-heading">MY ACTIVITY</p>
 
-        <span class="sidebar-coming-soon">
-            My Investigations
-        </span>
+        <div th:if="${loggedIn}">
+            <span class="sidebar-coming-soon">My Investigations</span>
+            <span class="sidebar-coming-soon">My Drafts</span>
+            <span class="sidebar-coming-soon">Evidence Vault</span>
+            <span class="sidebar-coming-soon">Submitted Reports</span>
+        </div>
 
-        <span class="sidebar-coming-soon">
-            My Drafts
-        </span>
-
-        <span class="sidebar-coming-soon">
-            Evidence Vault
-        </span>
-
-        <span class="sidebar-coming-soon">
-            Submitted Reports
-        </span>
+        <div th:unless="${loggedIn}" class="guest-notice">
+            <p>Want to participate?</p>
+            <span>Create an account to contribute to investigations.</span>
+            <a th:href="@{/signup}" class="sidebar-register">
+                Join CASEZERO
+            </a>
+        </div>
 
         <div class="sidebar-divider"></div>
 
@@ -101,19 +97,25 @@
             Contact Support
         </a>
 
+        <form th:if="${loggedIn}"
+              th:action="@{/logout}"
+              method="post"
+              class="sidebar-logout-form">
+
+            <button type="submit" class="sidebar-logout">
+                <span>↪</span> Sign Out
+            </button>
+        </form>
+
     </aside>
 
-
-    <!-- MAIN WEBSITE CONTENT -->
+    <!-- MAIN CONTENT -->
 
     <div class="member-content">
 
         <main class="home-main" id="top">
 
-            <!-- HERO SECTION -->
-
             <section class="hero-banner">
-
                 <div class="hero-content">
 
                     <span class="hero-label">
@@ -152,187 +154,119 @@
                         </a>
 
                     </div>
-
                 </div>
-
             </section>
 
-
-            <!-- ABOUT SECTION -->
-
             <section class="section-block">
-
                 <div class="section-heading">
-
                     <span>ABOUT CASEZERO</span>
-
                     <h2>Seeking Answers. Preserving Stories.</h2>
-
                     <p>
                         CASEZERO brings publicly available information
                         about unresolved cases into one organized platform.
                         Explore information, review sources, and contribute
                         responsibly to public awareness.
                     </p>
-
                 </div>
-
             </section>
-
-
-            <!-- INVESTIGATION CATEGORIES -->
 
             <section class="section-block" id="investigations">
 
                 <div class="section-heading">
-
                     <span>EXPLORE THE DATABASE</span>
-
                     <h2>Areas of Investigation</h2>
-
                     <p>
                         Explore different categories of unresolved cases
                         across Pakistan.
                     </p>
-
                 </div>
 
                 <div class="category-grid">
 
                     <article class="category-card">
-
-                        <span class="category-number">
-                            01 / PERSONS
-                        </span>
-
+                        <span class="category-number">01 / PERSONS</span>
                         <h3>Missing Persons</h3>
-
                         <p>
                             Publicly reported cases of individuals
                             whose whereabouts remain unknown.
                         </p>
-
                     </article>
 
-
                     <article class="category-card">
-
-                        <span class="category-number">
-                            02 / IDENTIFICATION
-                        </span>
-
+                        <span class="category-number">02 / IDENTIFICATION</span>
                         <h3>Unidentified Persons</h3>
-
                         <p>
                             Cases involving unidentified individuals
                             and publicly reported unidentified remains.
                         </p>
-
                     </article>
 
-
                     <article class="category-card">
-
-                        <span class="category-number">
-                            03 / CRIMINAL CASES
-                        </span>
-
+                        <span class="category-number">03 / CRIMINAL CASES</span>
                         <h3>Unsolved Crimes</h3>
-
                         <p>
                             Unresolved criminal cases documented
                             through publicly available sources.
                         </p>
-
                     </article>
 
                 </div>
-
             </section>
 
-
-            <!-- CASE ARCHIVE -->
-
-            <section class="section-block featured-section">
+            <section class="section-block featured-section" id="archive">
 
                 <div class="section-heading">
-
                     <span>CASE ARCHIVE</span>
-
                     <h2>Explore the Case Records</h2>
-
                     <p>
                         A centralized space for documented public
                         information about unresolved cases.
                     </p>
-
                 </div>
 
                 <div class="featured-placeholder">
-
                     <h3>Case Archive Coming Soon</h3>
-
                     <p>
                         The case database is being prepared.
                         Soon, visitors will be able to browse cases,
                         search records, and explore publicly documented
                         information.
                     </p>
-
                     <a class="button"
                        th:if="${!loggedIn}"
                        th:href="@{/signup}">
                         Become a Member
                     </a>
-
                 </div>
 
             </section>
 
-
-            <!-- FINAL CALL TO ACTION -->
-
             <section class="section-block">
-
                 <div class="section-heading">
-
                     <span>BE PART OF THE EFFORT</span>
-
                     <h2>Awareness Can Make a Difference.</h2>
-
                     <p>
                         Join CASEZERO and help support responsible
                         public awareness through verified information
                         and documented sources.
                     </p>
-
                     <a class="button"
                        th:if="${!loggedIn}"
                        th:href="@{/signup}">
                         Create Your Account
                     </a>
-
                 </div>
-
             </section>
 
         </main>
 
-
-        <!-- FOOTER -->
-
         <footer class="home-footer">
-
             CASEZERO — Supporting awareness through public information.
-
             <br>
-
             Pakistan-focused. Source-based. Responsible investigation.
-
         </footer>
 
     </div>
-
 </div>
 
 </body>

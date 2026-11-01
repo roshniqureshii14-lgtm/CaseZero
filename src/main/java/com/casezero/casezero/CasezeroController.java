@@ -1,7 +1,13 @@
 
 package com.casezero.casezero;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+
+import java.security.Principal;
+import java.util.Locale;
+import java.util.UUID;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,25 +34,79 @@ public class CasezeroController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // HOME PAGE: GUEST AND MEMBER DASHBOARD
+
     @GetMapping("/")
-public String home(Model model, java.security.Principal principal) {
+    public String home(
+            Model model,
+            Principal principal,
+            HttpSession session) {
 
-    boolean loggedIn = principal != null;
+        boolean loggedIn = principal != null;
 
-    model.addAttribute("loggedIn", loggedIn);
+        model.addAttribute("loggedIn", loggedIn);
 
-    if (loggedIn) {
-        model.addAttribute("username", principal.getName());
+        if (loggedIn) {
+
+            UserAccount account = repository
+                    .findByEmailIgnoreCase(principal.getName())
+                    .orElseThrow(() ->
+                            new IllegalStateException(
+                                    "Logged-in account was not found."));
+
+            // Assign an ID to accounts created before this feature.
+            if (account.getPublicId() == null
+                    || account.getPublicId().isBlank()) {
+
+                account.setPublicId(
+                        "CZ-" + UUID.randomUUID()
+                                .toString()
+                                .replace("-", "")
+                                .substring(0, 8)
+                                .toUpperCase(Locale.ROOT)
+                );
+
+                repository.save(account);
+            }
+
+            model.addAttribute("profileName", account.getName());
+            model.addAttribute("username", account.getEmail());
+            model.addAttribute("publicId", account.getPublicId());
+            model.addAttribute("profileType", "MEMBER");
+
+        } else {
+
+            // Keep the same guest ID throughout this browser session.
+            String guestId = (String) session.getAttribute("guestId");
+
+            if (guestId == null) {
+
+                guestId = "GUEST-" + UUID.randomUUID()
+                        .toString()
+                        .replace("-", "")
+                        .substring(0, 6)
+                        .toUpperCase(Locale.ROOT);
+
+                session.setAttribute("guestId", guestId);
+            }
+
+            model.addAttribute("profileName", "Guest Member");
+            model.addAttribute("publicId", guestId);
+            model.addAttribute("profileType", "GUEST");
+        }
+
+        return "home";
     }
 
-    return "home";
-}
+    // REGISTRATION
 
     @GetMapping("/signup")
     public String signup(Model model) {
+
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", new RegistrationForm());
         }
+
         return "signup";
     }
 
@@ -58,6 +118,7 @@ public String home(Model model, java.security.Principal principal) {
 
         if (form.getPassword() != null
                 && !form.getPassword().equals(form.getConfirmPassword())) {
+
             result.rejectValue(
                     "confirmPassword",
                     "password.mismatch",
@@ -65,7 +126,9 @@ public String home(Model model, java.security.Principal principal) {
         }
 
         if (form.getEmail() != null
-                && repository.existsByEmailIgnoreCase(form.getEmail().trim())) {
+                && repository.existsByEmailIgnoreCase(
+                        form.getEmail().trim())) {
+
             result.rejectValue(
                     "email",
                     "email.exists",
@@ -77,10 +140,16 @@ public String home(Model model, java.security.Principal principal) {
         }
 
         UserAccount account = new UserAccount();
-        account.setName(form.getName().trim());
-        account.setEmail(form.getEmail().trim().toLowerCase());
-        account.setPassword(passwordEncoder.encode(form.getPassword()));
 
+        account.setName(form.getName().trim());
+
+        account.setEmail(
+                form.getEmail().trim().toLowerCase());
+
+        account.setPassword(
+                passwordEncoder.encode(form.getPassword()));
+
+        // Public ID is generated automatically before database insertion.
         repository.save(account);
 
         redirectAttributes.addFlashAttribute(
@@ -90,18 +159,26 @@ public String home(Model model, java.security.Principal principal) {
         return "redirect:/login";
     }
 
+    // LOGIN PAGE
+
     @GetMapping("/login")
     public String login() {
         return "login";
     }
 
+    // CONTACT PAGE
+
     @GetMapping("/contact")
     public String contact(Model model) {
+
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", new ContactForm());
         }
+
         return "contact";
     }
+
+    // CONTACT FORM SUBMISSION
 
     @PostMapping("/contact")
     public String submitContact(
@@ -116,9 +193,12 @@ public String home(Model model, java.security.Principal principal) {
         ContactMessage contactMessage = new ContactMessage();
 
         contactMessage.setName(form.getName().trim());
+
         contactMessage.setEmail(
                 form.getEmail().trim().toLowerCase());
+
         contactMessage.setSubject(form.getSubject().trim());
+
         contactMessage.setMessage(form.getMessage().trim());
 
         contactRepository.save(contactMessage);
