@@ -15,12 +15,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class CasezeroController {
 
     private final UserAccountRepository repository;
+    private final ContactMessageRepository contactRepository;
     private final PasswordEncoder passwordEncoder;
 
     public CasezeroController(
             UserAccountRepository repository,
+            ContactMessageRepository contactRepository,
             PasswordEncoder passwordEncoder) {
+
         this.repository = repository;
+        this.contactRepository = contactRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -83,7 +87,37 @@ public class CasezeroController {
     }
 
     @GetMapping("/contact")
-    public String contact() {
+    public String contact(Model model) {
+        if (!model.containsAttribute("form")) {
+            model.addAttribute("form", new ContactForm());
+        }
         return "contact";
+    }
+
+    @PostMapping("/contact")
+    public String submitContact(
+            @Valid @ModelAttribute("form") ContactForm form,
+            BindingResult result,
+            RedirectAttributes redirectAttributes) {
+
+        if (result.hasErrors()) {
+            return "contact";
+        }
+
+        ContactMessage contactMessage = new ContactMessage();
+
+        contactMessage.setName(form.getName().trim());
+        contactMessage.setEmail(
+                form.getEmail().trim().toLowerCase());
+        contactMessage.setSubject(form.getSubject().trim());
+        contactMessage.setMessage(form.getMessage().trim());
+
+        contactRepository.save(contactMessage);
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Your message has been sent successfully!");
+
+        return "redirect:/contact";
     }
 }
