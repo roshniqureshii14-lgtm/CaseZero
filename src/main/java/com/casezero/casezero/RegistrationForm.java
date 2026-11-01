@@ -3,12 +3,14 @@ package com.casezero.casezero;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class RegistrationForm {
 
     @NotBlank(message = "Full name is required.")
-    @Size(min = 2, max = 80, message = "Name must be 2–80 characters.")
+    @Size(min = 2, max = 80,
+          message = "Name must be 2–80 characters.")
     private String name;
 
     @NotBlank(message = "Email is required.")
@@ -19,6 +21,10 @@ public class RegistrationForm {
     @NotBlank(message = "Password is required.")
     @Size(min = 8, max = 72,
           message = "Password must be 8–72 characters.")
+    @Pattern(
+        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).*$",
+        message = "Password must contain an uppercase letter, lowercase letter, number, and special character."
+    )
     private String password;
 
     @NotBlank(message = "Please confirm your password.")
