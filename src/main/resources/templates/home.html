@@ -1,15 +1,21 @@
 
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CASEZERO | Home</title>
+
+    <title>CASEZERO | Unresolved Cases in Pakistan</title>
+
     <link rel="stylesheet" th:href="@{/style.css}">
 </head>
+
 <body>
+
 <header>
     <h1>CASEZERO</h1>
+
     <nav>
         <a th:href="@{/}">Home</a>
         <a th:href="@{/signup}">Sign Up</a>
@@ -18,21 +24,203 @@
     </nav>
 </header>
 
-<main>
-    <section class="hero">
-        <p>PUBLIC INFORMATION. UNRESOLVED CASES. SEEKING ANSWERS.</p>
-        <h2>Every Unresolved Case Deserves to Be Remembered.</h2>
-        <p>
-            CASEZERO is a public-information investigation platform
-            focused on missing persons, unidentified persons, and
-            unsolved cases in Pakistan.
-        </p>
-        <a class="button" th:href="@{/signup}">Join CASEZERO</a>
+<main class="home-main">
+
+    <!-- HERO SECTION -->
+
+    <section class="hero-banner">
+
+        <div class="hero-content">
+
+            <span class="hero-label">
+                Pakistan's Public Case Investigation Platform
+            </span>
+
+            <h2>
+                Every Case Has a Story.
+                <span>Every Answer Matters.</span>
+            </h2>
+
+            <p>
+                Explore unresolved cases, missing persons,
+                unidentified individuals, and unsolved crimes
+                through publicly available information.
+                Because no case should simply be forgotten.
+            </p>
+
+            <div class="hero-actions">
+
+                <a class="button" th:href="@{/signup}">
+                    Join CASEZERO
+                </a>
+
+                <a class="button-outline" href="#investigations">
+                    Explore Investigations
+                </a>
+
+            </div>
+
+        </div>
+
     </section>
+
+
+    <!-- INTRODUCTION SECTION -->
+
+    <section class="section-block">
+
+        <div class="section-heading">
+
+            <span>ABOUT CASEZERO</span>
+
+            <h2>Seeking Answers. Preserving Stories.</h2>
+
+            <p>
+                CASEZERO brings publicly available information
+                about unresolved cases into one organized platform.
+                Explore information, review sources, and contribute
+                responsibly to public awareness.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- INVESTIGATION CATEGORIES -->
+
+    <section class="section-block" id="investigations">
+
+        <div class="section-heading">
+
+            <span>EXPLORE THE DATABASE</span>
+
+            <h2>Areas of Investigation</h2>
+
+            <p>
+                Explore different categories of unresolved cases
+                across Pakistan.
+            </p>
+
+        </div>
+
+        <div class="category-grid">
+
+            <article class="category-card">
+
+                <span class="category-number">01 / PERSONS</span>
+
+                <h3>Missing Persons</h3>
+
+                <p>
+                    Publicly reported cases of individuals
+                    whose whereabouts remain unknown.
+                </p>
+
+            </article>
+
+
+            <article class="category-card">
+
+                <span class="category-number">02 / IDENTIFICATION</span>
+
+                <h3>Unidentified Persons</h3>
+
+                <p>
+                    Cases involving unidentified individuals
+                    and publicly reported unidentified remains.
+                </p>
+
+            </article>
+
+
+            <article class="category-card">
+
+                <span class="category-number">03 / CRIMINAL CASES</span>
+
+                <h3>Unsolved Crimes</h3>
+
+                <p>
+                    Unresolved criminal cases documented
+                    through publicly available sources.
+                </p>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- FEATURED CASES SECTION -->
+
+    <section class="section-block featured-section">
+
+        <div class="section-heading">
+
+            <span>CASE ARCHIVE</span>
+
+            <h2>Explore the Case Records</h2>
+
+            <p>
+                A centralized space for documented public
+                information about unresolved cases.
+            </p>
+
+        </div>
+
+        <div class="featured-placeholder">
+
+            <h3>Case Archive Coming Soon</h3>
+
+            <p>
+                The case database is being prepared.
+                Soon, visitors will be able to browse cases,
+                search records, and explore publicly documented
+                information.
+            </p>
+
+            <a class="button" th:href="@{/signup}">
+                Become a Member
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- CLOSING SECTION -->
+
+    <section class="section-block">
+
+        <div class="section-heading">
+
+            <span>BE PART OF THE EFFORT</span>
+
+            <h2>Awareness Can Make a Difference.</h2>
+
+            <p>
+                Join CASEZERO and help support responsible
+                public awareness through verified information
+                and documented sources.
+            </p>
+
+            <a class="button" th:href="@{/signup}">
+                Create Your Account
+            </a>
+
+        </div>
+
+    </section>
+
 </main>
 
-<footer>
+
+<footer class="home-footer">
     CASEZERO — Supporting awareness through public information.
+    <br>
+    Pakistan-focused. Source-based. Responsible investigation.
 </footer>
+
 </body>
 </html>

@@ -29,9 +29,18 @@ public class CasezeroController {
     }
 
     @GetMapping("/")
-    public String home() {
-        return "home";
+public String home(Model model, java.security.Principal principal) {
+
+    boolean loggedIn = principal != null;
+
+    model.addAttribute("loggedIn", loggedIn);
+
+    if (loggedIn) {
+        model.addAttribute("username", principal.getName());
     }
+
+    return "home";
+}
 
     @GetMapping("/signup")
     public String signup(Model model) {
