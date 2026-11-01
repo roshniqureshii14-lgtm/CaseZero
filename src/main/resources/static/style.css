@@ -650,3 +650,150 @@ footer {
         padding: 42px 6%;
     }
 }
+
+/* MEMBER WORKSPACE LAYOUT */
+
+.member-layout {
+    display: grid;
+    grid-template-columns: 235px minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+.dashboard-sidebar {
+    background: #17181d;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    padding: 30px 18px;
+}
+
+.sidebar-heading {
+    color: #9999a3;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    margin: 15px 10px;
+}
+
+.sidebar-link,
+.sidebar-coming-soon {
+    display: block;
+    padding: 12px 14px;
+    margin: 5px 0;
+    border-radius: 7px;
+    color: #c7c7ce;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+    background: rgba(180, 45, 60, 0.18);
+    color: #ffffff;
+}
+
+.sidebar-coming-soon {
+    color: #777780;
+    cursor: default;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.09);
+    margin: 20px 8px;
+}
+
+.sidebar-logout {
+    width: 100%;
+    margin-top: 18px;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 7px;
+    color: #e1a0a6;
+    cursor: pointer;
+    text-align: left;
+}
+
+.sidebar-logout:hover {
+    background: rgba(180, 45, 60, 0.18);
+}
+
+.member-content {
+    min-width: 0;
+}
+
+/* MOBILE LAYOUT */
+
+@media (max-width: 768px) {
+    .member-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-sidebar {
+        padding: 18px;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-link,
+    .sidebar-coming-soon {
+        display: inline-block;
+        margin: 3px;
+    }
+
+    .sidebar-divider {
+        margin: 12px 0;
+    }
+
+    .sidebar-logout {
+        width: auto;
+    }
+}
+
+/* HEADER ACCOUNT AREA */
+
+.account-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: 12px;
+}
+
+.account-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #a9d8b0;
+    font-size: 12px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #55c878;
+    border-radius: 50%;
+}
+
+.account-name {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.header-logout {
+    padding: 8px 13px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    color: #e1a0a6;
+    cursor: pointer;
+}
+
+.header-logout:hover {
+    background: rgba(180,45,60,0.18);
+}
+
+@media (max-width: 768px) {
+    .account-area {
+        flex-wrap: wrap;
+        margin-left: 0;
+    }
+}
