@@ -7,29 +7,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CASEZERO | Unresolved Cases in Pakistan</title>
     <link rel="stylesheet" th:href="@{/style.css}">
+
+    <style>
+        .case-details {
+            margin-top: 16px;
+            padding: 12px;
+            border: 1px solid var(--border-accent, #444);
+            border-radius: 10px;
+            background: var(--bg-input, #202020);
+        }
+
+        .case-details summary {
+            color: var(--accent, #c9a45c);
+            cursor: pointer;
+            font-weight: bold;
+            padding: 5px 0;
+        }
+
+        .case-details summary:hover {
+            opacity: 0.8;
+        }
+
+        .case-details p {
+            color: var(--text-secondary, #b5b5b5);
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 
 <body>
 
+<!-- HEADER -->
 <header>
     <h1>CASEZERO</h1>
 
     <nav>
         <a th:href="@{/}">Home</a>
+        <a th:href="@{/signup}">Sign Up</a>
+        <a th:href="@{/login}">Sign In</a>
         <a th:href="@{/contact}">Contact Us</a>
-
-        <a th:if="${!loggedIn}" th:href="@{/signup}">Register</a>
-        <a th:if="${!loggedIn}" th:href="@{/login}">Sign In</a>
     </nav>
 </header>
 
 <!-- GUEST AND MEMBER DASHBOARD -->
-
 <div th:class="${loggedIn} ? 'member-layout' : 'guest-layout'">
 
+    <!-- SIDEBAR -->
     <aside class="dashboard-sidebar">
-
-        <!-- PROFILE CARD -->
 
         <div class="sidebar-profile">
 
@@ -46,13 +72,11 @@
                     PROFILE
                 </span>
 
-                <strong class="profile-name"
-                        th:text="${profileName}">
+                <strong class="profile-name" th:text="${profileName}">
                     Guest Member
                 </strong>
 
-                <span class="profile-id"
-                      th:text="${publicId}">
+                <span class="profile-id" th:text="${publicId}">
                     GUEST-XXXXXX
                 </span>
 
@@ -69,8 +93,8 @@
         <p class="sidebar-heading">MY WORKSPACE</p>
 
         <a href="#top" class="sidebar-link active">Overview</a>
-        <a href="#investigations" class="sidebar-link">Explore Cases</a>
-        <a href="#archive" class="sidebar-link">Case Archive</a>
+        <a href="#archive" class="sidebar-link">Explore Cases</a>
+        <a href="#investigations" class="sidebar-link">Areas of Investigation</a>
 
         <div class="sidebar-divider"></div>
 
@@ -86,6 +110,7 @@
         <div th:unless="${loggedIn}" class="guest-notice">
             <p>Want to participate?</p>
             <span>Create an account to contribute to investigations.</span>
+
             <a th:href="@{/signup}" class="sidebar-register">
                 Join CASEZERO
             </a>
@@ -105,17 +130,19 @@
             <button type="submit" class="sidebar-logout">
                 <span>↪</span> Sign Out
             </button>
+
         </form>
 
     </aside>
 
     <!-- MAIN CONTENT -->
-
     <div class="member-content">
 
         <main class="home-main" id="top">
 
+            <!-- HERO SECTION -->
             <section class="hero-banner">
+
                 <div class="hero-content">
 
                     <span class="hero-label">
@@ -144,41 +171,282 @@
 
                         <a class="button"
                            th:if="${loggedIn}"
-                           href="#investigations">
+                           href="#archive">
                             Explore Cases
                         </a>
 
-                        <a class="button-outline"
-                           href="#investigations">
+                        <a class="button-outline" href="#investigations">
                             Explore Investigations
                         </a>
 
                     </div>
+
                 </div>
+
             </section>
 
-            <section class="section-block">
+            <!-- CASE ARCHIVE -->
+            <section class="section-block featured-section" id="archive">
+
                 <div class="section-heading">
+                    <span>CASE ARCHIVE</span>
+
+                    <h2>Explore Unresolved Cases</h2>
+
+                    <p>
+                        Search and explore demonstration records by category,
+                        location, and investigation status.
+                    </p>
+                </div>
+
+                <!-- SEARCH AND FILTERS -->
+                <div class="case-filters">
+
+                    <input
+                        type="search"
+                        id="caseSearch"
+                        placeholder="Search cases, locations or keywords..."
+                        aria-label="Search cases">
+
+                    <select id="categoryFilter" aria-label="Filter by category">
+                        <option value="">All Categories</option>
+                        <option value="Missing Persons">Missing Persons</option>
+                        <option value="Unidentified Persons">Unidentified Persons</option>
+                        <option value="Unsolved Crimes">Unsolved Crimes</option>
+                    </select>
+
+                    <select id="statusFilter" aria-label="Filter by status">
+                        <option value="">All Statuses</option>
+                        <option value="Open">Open</option>
+                        <option value="Under Review">Under Review</option>
+                    </select>
+
+                    <button type="button" id="clearFilters">
+                        Clear Filters
+                    </button>
+
+                </div>
+
+                <p id="resultCount" class="result-count">
+                    Showing 4 demonstration records
+                </p>
+
+                <!-- CASE CARDS -->
+                <div class="case-grid" id="caseGrid">
+
+                    <!-- CASE 1 -->
+                    <article class="case-card"
+                             data-category="Missing Persons"
+                             data-status="Open">
+
+                        <span class="case-tag">Missing Persons</span>
+
+                        <h3>Demo Missing Person Record</h3>
+
+                        <p><strong>Location:</strong> Lahore, Punjab</p>
+
+                        <p>
+                            Demonstration record showing how missing-person
+                            information could be displayed.
+                        </p>
+
+                        <span class="case-status status-open">Open</span>
+
+                        <details class="case-details">
+                            <summary>View Case Details</summary>
+
+                            <p><strong>Record Type:</strong> Demonstration</p>
+                            <p><strong>Category:</strong> Missing Persons</p>
+                            <p><strong>Location:</strong> Lahore, Punjab</p>
+                            <p><strong>Status:</strong> Open</p>
+
+                            <p>
+                                <strong>Investigation Information:</strong>
+                                This sample demonstrates how missing-person
+                                information and investigation details could
+                                be organized on CASEZERO.
+                            </p>
+
+                            <p>
+                                <strong>Source:</strong> Demonstration data.
+                                No real person or external case source is represented.
+                            </p>
+                        </details>
+
+                    </article>
+
+                    <!-- CASE 2 -->
+                    <article class="case-card"
+                             data-category="Unidentified Persons"
+                             data-status="Under Review">
+
+                        <span class="case-tag">Unidentified Persons</span>
+
+                        <h3>Demo Unidentified Person Record</h3>
+
+                        <p><strong>Location:</strong> Rawalpindi, Punjab</p>
+
+                        <p>
+                            Demonstration record for an unidentified-person
+                            investigation.
+                        </p>
+
+                        <span class="case-status status-review">
+                            Under Review
+                        </span>
+
+                        <details class="case-details">
+                            <summary>View Case Details</summary>
+
+                            <p><strong>Record Type:</strong> Demonstration</p>
+                            <p><strong>Category:</strong> Unidentified Persons</p>
+                            <p><strong>Location:</strong> Rawalpindi, Punjab</p>
+                            <p><strong>Status:</strong> Under Review</p>
+
+                            <p>
+                                <strong>Investigation Information:</strong>
+                                This sample demonstrates how information
+                                about unidentified individuals and publicly
+                                reported remains could be organized.
+                            </p>
+
+                            <p>
+                                <strong>Source:</strong> Demonstration data.
+                                No real person or external case source is represented.
+                            </p>
+                        </details>
+
+                    </article>
+
+                    <!-- CASE 3 -->
+                    <article class="case-card"
+                             data-category="Unsolved Crimes"
+                             data-status="Open">
+
+                        <span class="case-tag">Unsolved Crimes</span>
+
+                        <h3>Demo Unsolved Crime Record</h3>
+
+                        <p><strong>Location:</strong> Karachi, Sindh</p>
+
+                        <p>
+                            Demonstration record showing how unresolved
+                            crimes could appear.
+                        </p>
+
+                        <span class="case-status status-open">Open</span>
+
+                        <details class="case-details">
+                            <summary>View Case Details</summary>
+
+                            <p><strong>Record Type:</strong> Demonstration</p>
+                            <p><strong>Category:</strong> Unsolved Crimes</p>
+                            <p><strong>Location:</strong> Karachi, Sindh</p>
+                            <p><strong>Status:</strong> Open</p>
+
+                            <p>
+                                <strong>Investigation Information:</strong>
+                                This sample demonstrates how an unresolved
+                                crime record, its background and investigation
+                                status could be presented.
+                            </p>
+
+                            <p>
+                                <strong>Source:</strong> Demonstration data.
+                                No real crime or external case source is represented.
+                            </p>
+                        </details>
+
+                    </article>
+
+                    <!-- CASE 4 -->
+                    <article class="case-card"
+                             data-category="Missing Persons"
+                             data-status="Under Review">
+
+                        <span class="case-tag">Missing Persons</span>
+
+                        <h3>Demo Missing Person Record 02</h3>
+
+                        <p>
+                            <strong>Location:</strong>
+                            Peshawar, Khyber Pakhtunkhwa
+                        </p>
+
+                        <p>
+                            A second demonstration record for testing
+                            the archive filters.
+                        </p>
+
+                        <span class="case-status status-review">
+                            Under Review
+                        </span>
+
+                        <details class="case-details">
+                            <summary>View Case Details</summary>
+
+                            <p><strong>Record Type:</strong> Demonstration</p>
+                            <p><strong>Category:</strong> Missing Persons</p>
+                            <p><strong>Location:</strong> Peshawar, Khyber Pakhtunkhwa</p>
+                            <p><strong>Status:</strong> Under Review</p>
+
+                            <p>
+                                <strong>Investigation Information:</strong>
+                                This sample demonstrates how multiple
+                                missing-person records can be displayed
+                                and reviewed through the archive.
+                            </p>
+
+                            <p>
+                                <strong>Source:</strong> Demonstration data.
+                                No real person or external case source is represented.
+                            </p>
+                        </details>
+
+                    </article>
+
+                </div>
+
+                <p id="noResults" class="no-results" hidden>
+                    No matching records found. Try another search.
+                </p>
+
+            </section>
+
+            <!-- ABOUT CASEZERO -->
+            <section class="section-block">
+
+                <div class="section-heading">
+
                     <span>ABOUT CASEZERO</span>
+
                     <h2>Seeking Answers. Preserving Stories.</h2>
+
                     <p>
                         CASEZERO brings publicly available information
                         about unresolved cases into one organized platform.
                         Explore information, review sources, and contribute
                         responsibly to public awareness.
                     </p>
+
                 </div>
+
             </section>
 
+            <!-- INVESTIGATION CATEGORIES -->
             <section class="section-block" id="investigations">
 
                 <div class="section-heading">
+
                     <span>EXPLORE THE DATABASE</span>
+
                     <h2>Areas of Investigation</h2>
+
                     <p>
                         Explore different categories of unresolved cases
                         across Pakistan.
                     </p>
+
                 </div>
 
                 <div class="category-grid">
@@ -211,55 +479,37 @@
                     </article>
 
                 </div>
-            </section>
-
-            <section class="section-block featured-section" id="archive">
-
-                <div class="section-heading">
-                    <span>CASE ARCHIVE</span>
-                    <h2>Explore the Case Records</h2>
-                    <p>
-                        A centralized space for documented public
-                        information about unresolved cases.
-                    </p>
-                </div>
-
-                <div class="featured-placeholder">
-                    <h3>Case Archive Coming Soon</h3>
-                    <p>
-                        The case database is being prepared.
-                        Soon, visitors will be able to browse cases,
-                        search records, and explore publicly documented
-                        information.
-                    </p>
-                    <a class="button"
-                       th:if="${!loggedIn}"
-                       th:href="@{/signup}">
-                        Become a Member
-                    </a>
-                </div>
 
             </section>
 
+            <!-- CALL TO ACTION -->
             <section class="section-block">
+
                 <div class="section-heading">
+
                     <span>BE PART OF THE EFFORT</span>
+
                     <h2>Awareness Can Make a Difference.</h2>
+
                     <p>
                         Join CASEZERO and help support responsible
                         public awareness through verified information
                         and documented sources.
                     </p>
+
                     <a class="button"
                        th:if="${!loggedIn}"
                        th:href="@{/signup}">
                         Create Your Account
                     </a>
+
                 </div>
+
             </section>
 
         </main>
 
+        <!-- FOOTER -->
         <footer class="home-footer">
             CASEZERO — Supporting awareness through public information.
             <br>
@@ -267,7 +517,76 @@
         </footer>
 
     </div>
+
 </div>
+
+<!-- CASE SEARCH AND FILTER FUNCTIONALITY -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const search = document.getElementById("caseSearch");
+    const category = document.getElementById("categoryFilter");
+    const status = document.getElementById("statusFilter");
+    const clear = document.getElementById("clearFilters");
+
+    const cards = document.querySelectorAll(".case-card");
+    const count = document.getElementById("resultCount");
+    const noResults = document.getElementById("noResults");
+
+    function filterCases() {
+
+        const keyword = search.value.toLowerCase().trim();
+        let visible = 0;
+
+        cards.forEach(function (card) {
+
+            const text = card.textContent.toLowerCase();
+
+            const matchesSearch = text.includes(keyword);
+
+            const matchesCategory =
+                !category.value ||
+                card.dataset.category === category.value;
+
+            const matchesStatus =
+                !status.value ||
+                card.dataset.status === status.value;
+
+            const show =
+                matchesSearch &&
+                matchesCategory &&
+                matchesStatus;
+
+            card.hidden = !show;
+
+            if (show) {
+                visible++;
+            }
+
+        });
+
+        count.textContent =
+            "Showing " + visible + " demonstration record(s)";
+
+        noResults.hidden = visible !== 0;
+    }
+
+    search.addEventListener("input", filterCases);
+    category.addEventListener("change", filterCases);
+    status.addEventListener("change", filterCases);
+
+    clear.addEventListener("click", function () {
+
+        search.value = "";
+        category.value = "";
+        status.value = "";
+
+        filterCases();
+
+    });
+
+});
+</script>
 
 </body>
 </html>

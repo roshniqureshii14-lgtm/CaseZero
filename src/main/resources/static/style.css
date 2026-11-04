@@ -983,3 +983,270 @@ footer {
         border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 }
+
+/* CASEZERO Case Explorer */
+
+.case-filters {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 12px;
+    margin: 25px 0 15px;
+}
+
+.case-filters input,
+.case-filters select {
+    width: 100%;
+    min-width: 0;
+    padding: 13px;
+    border: 1px solid #343444;
+    border-radius: 8px;
+    background: #171722;
+    color: #fff;
+}
+
+.case-filters button {
+    padding: 12px 16px;
+    border: 1px solid #a78bfa;
+    border-radius: 8px;
+    background: transparent;
+    color: #c4b5fd;
+    cursor: pointer;
+}
+
+.case-filters button:hover {
+    background: #a78bfa;
+    color: #111;
+}
+
+.result-count {
+    color: #a1a1aa;
+    font-size: 13px;
+    margin: 15px 0;
+}
+
+.case-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.case-card {
+    padding: 22px;
+    border: 1px solid #303040;
+    border-radius: 12px;
+    background: #171722;
+    transition: 0.2s ease;
+}
+
+.case-card:hover {
+    transform: translateY(-3px);
+    border-color: #8b5cf6;
+}
+
+.case-card[hidden] {
+    display: none;
+}
+
+.case-tag {
+    color: #c4b5fd;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.case-card h3 {
+    margin: 14px 0 10px;
+    color: #fff;
+    font-size: 18px;
+}
+
+.case-card p {
+    color: #a1a1aa;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.case-status {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+}
+
+.status-open {
+    background: #163b30;
+    color: #86efac;
+}
+
+.status-review {
+    background: #3b3020;
+    color: #fcd34d;
+}
+
+.no-results {
+    color: #a1a1aa;
+    padding: 25px 0;
+}
+
+@media (max-width: 750px) {
+    .case-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .case-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* CASEZERO - Improved homepage archive layout */
+
+.featured-section {
+    padding: 30px;
+    border: 1px solid #303040;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #171722, #11111a);
+    scroll-margin-top: 25px;
+}
+
+.featured-section .section-heading {
+    margin-bottom: 25px;
+}
+
+.featured-section .section-heading h2 {
+    font-size: 30px;
+}
+
+.case-filters {
+    display: grid;
+    grid-template-columns: minmax(180px, 2fr) 1fr 1fr auto;
+    gap: 12px;
+    margin: 24px 0 16px;
+}
+
+.case-filters input,
+.case-filters select {
+    width: 100%;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid #343444;
+    border-radius: 9px;
+    background: #1b1b29;
+    color: #fff;
+    outline: none;
+}
+
+.case-filters input:focus,
+.case-filters select:focus {
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 2px #a78bfa33;
+}
+
+.case-filters button {
+    padding: 12px 17px;
+    border: 1px solid #a78bfa;
+    border-radius: 9px;
+    background: transparent;
+    color: #c4b5fd;
+    cursor: pointer;
+}
+
+.case-filters button:hover {
+    background: #a78bfa;
+    color: #111;
+}
+
+.case-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.case-card {
+    padding: 23px;
+    border: 1px solid #343444;
+    border-radius: 12px;
+    background: #1b1b29;
+    transition: 0.2s ease;
+}
+
+.case-card:hover {
+    transform: translateY(-4px);
+    border-color: #a78bfa;
+    box-shadow: 0 8px 25px #00000030;
+}
+
+.case-card[hidden] {
+    display: none;
+}
+
+.result-count {
+    color: #a1a1aa;
+    font-size: 13px;
+    margin: 15px 0;
+}
+
+.case-tag {
+    color: #c4b5fd;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.case-card h3 {
+    margin: 14px 0;
+    color: #fff;
+}
+
+.case-card p {
+    color: #a1a1aa;
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.case-status {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 6px 11px;
+    border-radius: 20px;
+    font-size: 11px;
+}
+
+.status-open {
+    background: #163b30;
+    color: #86efac;
+}
+
+.status-review {
+    background: #3b3020;
+    color: #fcd34d;
+}
+
+@media (max-width: 750px) {
+    .case-filters,
+    .case-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .featured-section {
+        padding: 18px;
+    }
+}
+.case-details {
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid var(--border-accent);
+    border-radius: 10px;
+    background: var(--bg-input);
+}
+
+.case-details summary {
+    color: var(--accent);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.case-details p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin: 10px 0;
+}
