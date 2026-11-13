@@ -29,6 +29,7 @@ public class SecurityConfig {
                         "/signup",
                         "/login",
                         "/contact",
+                        "/research",
                         "/style.css",
                         "/images/**",
                         "/error"

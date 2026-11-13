@@ -164,7 +164,6 @@ p {
 
 /* BUTTONS */
 
-
 .button,
 button {
     display: inline-flex;
@@ -1250,4 +1249,98 @@ footer {
     color: var(--text-secondary);
     font-size: 13px;
     margin: 10px 0;
+}
+
+/* PUBLIC RESEARCH FEED */
+.research-page {
+    width: min(1120px, 90%);
+    margin: 55px auto 80px;
+}
+.research-intro {
+    padding: 42px;
+    background: linear-gradient(145deg, #20232b, #15171c);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-large);
+}
+.research-intro h2 {
+    font-size: clamp(34px, 5vw, 54px);
+    margin: 12px 0;
+}
+.research-intro > p {
+    max-width: 760px;
+}
+.research-search {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+    margin-top: 28px;
+}
+.research-search label {
+    grid-column: 1 / -1;
+    margin-bottom: -7px;
+}
+.research-search button {
+    margin-top: 0;
+    min-height: 48px;
+}
+.research-note {
+    margin: 18px 0 0;
+    font-size: 13px;
+}
+.research-results {
+    margin-top: 48px;
+}
+.research-results-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+.research-results-heading h2 {
+    margin: 8px 0 0;
+}
+.research-source,
+.research-card-label {
+    color: #ff858d;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+.research-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+.research-card,
+.research-empty {
+    padding: 25px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+.research-card h3 {
+    margin: 13px 0;
+    line-height: 1.45;
+}
+.research-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-size: 12px;
+}
+.research-card .button {
+    margin-top: 12px;
+}
+.research-empty {
+    color: var(--text-secondary);
+}
+@media (max-width: 700px) {
+    .research-intro { padding: 25px 20px; }
+    .research-search { grid-template-columns: 1fr; }
+    .research-search button { width: 100%; }
+    .research-grid { grid-template-columns: 1fr; }
 }
