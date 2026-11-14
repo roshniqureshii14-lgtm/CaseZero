@@ -1,202 +1,124 @@
 package com.casezero.casezero;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rometools.rome.feed.synd.SyndEntry;
+import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.io.SyndFeedInput;
+import com.rometools.rome.io.XmlReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.util.UriComponentsBuilder;
 
+/**
+ * Collects public article metadata from independent Pakistani publisher RSS feeds.
+ * Articles are research leads only; they are not verified CASEZERO cases.
+ */
 @Service
 public class NewsResearchService {
-
     private static final Logger log = LoggerFactory.getLogger(NewsResearchService.class);
-    private static final String API_URL =
-            "https://api.gdeltproject.org/api/v2/doc/doc";
+    private static final int CONNECT_TIMEOUT_MS = 8_000;
+    private static final int READ_TIMEOUT_MS = 12_000;
+    private static final Pattern QUOTED_TERM = Pattern.compile("\"([^\"]+)\"");
 
-    // GDELT asks clients to make no more than one request every five seconds.
-    private static final long MIN_REQUEST_INTERVAL_MS = 5_300;
-    private static final long CACHE_TTL_MS = 10 * 60 * 1_000L;
-    private static final long STALE_CACHE_TTL_MS = 24 * 60 * 60 * 1_000L;
-    private static final long RATE_LIMIT_COOLDOWN_MS = 60 * 1_000L;
-
-    private final RestClient restClient = RestClient.builder()
-            .defaultHeader("User-Agent", "CASEZERO-PublicResearch/1.0")
-            .defaultHeader("Accept", "application/json")
-            .build();
-    private final ObjectMapper objectMapper;
-    private final Map<String, CachedArticles> cache = new ConcurrentHashMap<>();
-    private final Object requestLock = new Object();
-
-    private long lastRequestStartedAt;
-    private long rateLimitedUntil;
-
-    public NewsResearchService(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+    private static final List<FeedSource> SOURCES = List.of(
+            new FeedSource("Dawn", "https://www.dawn.com/feeds/pakistan/"),
+            new FeedSource("The Express Tribune", "https://tribune.com.pk/feed/home"),
+            new FeedSource("The Nation", "https://nation.com.pk/rss/top-stories"),
+            new FeedSource("Jang", "https://jang.com.pk/rss/1/1"),
+            new FeedSource("The News International", "https://www.thenews.com.pk/rss/1/1"),
+            new FeedSource("UrduPoint", "https://www.urdupoint.com/rss/urdupoint.rss"),
+            new FeedSource("Express Urdu", "https://www.express.pk/feed/")
+    );
 
     public List<ResearchArticle> searchPakistanNews(String searchTerm) {
-        String cleanTerm = searchTerm == null ? "" : searchTerm.trim();
-        if (cleanTerm.isBlank()) {
-            cleanTerm = "missing persons";
-        }
+        List<String> terms = extractTerms(searchTerm);
+        Map<String, ResearchArticle> uniqueArticles = new LinkedHashMap<>();
 
-        String cacheKey = cleanTerm.toLowerCase();
-        CachedArticles cached = cache.get(cacheKey);
-        long now = System.currentTimeMillis();
-
-        if (cached != null && now - cached.fetchedAt < CACHE_TTL_MS) {
-            log.debug("Serving Research Feed results from cache for '{}'.", cleanTerm);
-            return cached.articles;
-        }
-
-        // Serialize outbound requests so different searches also respect GDELT's limit.
-        synchronized (requestLock) {
-            cached = cache.get(cacheKey);
-            now = System.currentTimeMillis();
-
-            if (cached != null && now - cached.fetchedAt < CACHE_TTL_MS) {
-                return cached.articles;
-            }
-
-            if (now < rateLimitedUntil) {
-                return useStaleCacheOrThrow(cacheKey, cleanTerm,
-                        "GDELT has temporarily rate-limited CASEZERO. Please try again later.");
-            }
-
-            long waitMillis = MIN_REQUEST_INTERVAL_MS - (now - lastRequestStartedAt);
-            if (lastRequestStartedAt > 0 && waitMillis > 0) {
-                try {
-                    Thread.sleep(waitMillis);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    return useStaleCacheOrThrow(cacheKey, cleanTerm,
-                            "The Research Feed request was interrupted.");
-                }
-            }
-
-            lastRequestStartedAt = System.currentTimeMillis();
-
+        for (FeedSource source : SOURCES) {
             try {
-                List<ResearchArticle> articles = fetchFromGdelt(cleanTerm);
-                List<ResearchArticle> safeArticles = List.copyOf(articles);
-                cache.put(cacheKey, new CachedArticles(safeArticles, System.currentTimeMillis()));
-                return safeArticles;
-            } catch (RestClientResponseException ex) {
-                if (ex.getStatusCode().value() == 429) {
-                    rateLimitedUntil = System.currentTimeMillis() + RATE_LIMIT_COOLDOWN_MS;
-                    log.warn("GDELT rate limit reached. CASEZERO will pause new requests for 60 seconds.");
+                for (ResearchArticle article : readFeed(source)) {
+                    String searchableText = (article.title() + " " + article.description())
+                            .toLowerCase(Locale.ROOT);
+                    if (terms.stream().anyMatch(term -> searchableText.contains(term))) {
+                        uniqueArticles.putIfAbsent(article.url(), article);
+                    }
                 }
-                return useStaleCacheOrThrow(cacheKey, cleanTerm,
-                        "The GDELT service returned HTTP " + ex.getStatusCode().value()
-                                + ". Response preview: " + responsePreview(ex.getResponseBodyAsString()));
-            } catch (RestClientException | IllegalStateException ex) {
-                return useStaleCacheOrThrow(cacheKey, cleanTerm,
-                        "The GDELT request could not be completed: " + ex.getMessage());
+            } catch (Exception ex) {
+                // One unavailable publisher must not prevent collection from other feeds.
+                log.warn("Could not read {} RSS feed: {}", source.name(), ex.getMessage());
             }
         }
+
+        log.info("RSS search matched {} unique article(s) across {} configured publisher feeds.",
+                uniqueArticles.size(), SOURCES.size());
+        return new ArrayList<>(uniqueArticles.values());
     }
 
-    private List<ResearchArticle> fetchFromGdelt(String cleanTerm) {
-        // Keep the feed Pakistan-focused while allowing the visitor to choose a topic.
-        String query = "Pakistan " + cleanTerm;
+    private List<ResearchArticle> readFeed(FeedSource source) throws Exception {
+        URLConnection connection = new URL(source.url()).openConnection();
+        connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+        connection.setReadTimeout(READ_TIMEOUT_MS);
+        connection.setRequestProperty("User-Agent", "CASEZERO-PublicResearch/1.0 (RSS reader)");
+        connection.setRequestProperty("Accept", "application/rss+xml, application/atom+xml, application/xml, text/xml");
 
-        String requestUrl = UriComponentsBuilder
-                .fromUriString(API_URL)
-                .queryParam("query", query)
-                .queryParam("mode", "artlist")
-                .queryParam("format", "json")
-                .queryParam("timespan", "3months")
-                .queryParam("maxrecords", 15)
-                .build()
-                .encode()
-                .toUriString();
+        try (InputStream input = connection.getInputStream();
+             XmlReader reader = new XmlReader(input)) {
+            SyndFeed feed = new SyndFeedInput().build(reader);
+            List<ResearchArticle> articles = new ArrayList<>();
 
-        ResponseEntity<String> apiResponse = restClient.get()
-                .uri(requestUrl)
-                .retrieve()
-                .toEntity(String.class);
+            for (SyndEntry entry : feed.getEntries()) {
+                String title = cleanText(entry.getTitle());
+                String link = entry.getLink() == null ? "" : entry.getLink().trim();
+                String description = entry.getDescription() == null
+                        ? "" : cleanText(entry.getDescription().getValue());
+                Date date = entry.getPublishedDate() != null
+                        ? entry.getPublishedDate() : entry.getUpdatedDate();
+                String publishedAt = date == null ? "" : Instant.ofEpochMilli(date.getTime()).toString();
 
-        String contentType = apiResponse.getHeaders().getFirst("Content-Type");
-        String responseBody = apiResponse.getBody();
-
-        if (responseBody == null || responseBody.isBlank()) {
-            throw new IllegalStateException("The news service returned an empty response. Content-Type: "
-                    + contentType);
+                if (!title.isBlank() && link.startsWith("https://")) {
+                    articles.add(new ResearchArticle(title, link, source.name(), publishedAt, description));
+                }
+            }
+            return articles;
         }
+    }
 
-        if (contentType != null && !contentType.toLowerCase(Locale.ROOT).contains("json")) {
-            throw new IllegalStateException("GDELT returned a non-JSON response. Content-Type: "
-                    + contentType + ". Response preview: " + responsePreview(responseBody));
-        }
-
-        final JsonNode response;
-        try {
-            response = objectMapper.readTree(responseBody);
-        } catch (JsonProcessingException ex) {
-            // GDELT can return a plain-text/HTML error page instead of JSON.
-            throw new IllegalStateException("The news service did not return JSON data.", ex);
-        }
-
-        if (response == null || !response.path("articles").isArray()) {
-            throw new IllegalStateException("The news service response did not contain an article list. "
-                    + "Content-Type: " + contentType + ". Response preview: " + responsePreview(responseBody));
-        }
-
-        List<ResearchArticle> articles = new ArrayList<>();
-        for (JsonNode item : response.path("articles")) {
-            String title = item.path("title").asText("");
-            String url = item.path("url").asText("");
-            String source = item.path("domain").asText("News source");
-            String publishedAt = item.path("seendate").asText("");
-
-            if (!title.isBlank() && url.startsWith("https://")) {
-                articles.add(new ResearchArticle(title, url, source, publishedAt));
+    private List<String> extractTerms(String searchTerm) {
+        List<String> terms = new ArrayList<>();
+        if (searchTerm != null) {
+            Matcher matcher = QUOTED_TERM.matcher(searchTerm);
+            while (matcher.find()) {
+                String term = matcher.group(1).trim().toLowerCase(Locale.ROOT);
+                if (!term.isBlank()) terms.add(term);
+            }
+            if (terms.isEmpty() && !searchTerm.isBlank()) {
+                terms.add(searchTerm.trim().toLowerCase(Locale.ROOT));
             }
         }
-        return articles;
+        if (terms.isEmpty()) terms.add("missing person");
+        return terms;
     }
 
-    private String responsePreview(String body) {
-        if (body == null || body.isBlank()) {
-            return "(empty response body)";
-        }
-        String oneLine = body.replaceAll("\\s+", " ").trim();
-        return oneLine.length() <= 500 ? oneLine : oneLine.substring(0, 500) + "...";
+    private String cleanText(String value) {
+        if (value == null) return "";
+        return value.replaceAll("<[^>]*>", " ")
+                .replace("&nbsp;", " ")
+                .replace("&amp;", "&")
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 
-    private List<ResearchArticle> useStaleCacheOrThrow(
-            String cacheKey, String searchTerm, String reason) {
-        CachedArticles cached = cache.get(cacheKey);
-        long age = cached == null ? Long.MAX_VALUE
-                : System.currentTimeMillis() - cached.fetchedAt;
-
-        if (cached != null && age <= STALE_CACHE_TTL_MS) {
-            log.warn("Using saved Research Feed results for '{}' because: {}", searchTerm, reason);
-            return cached.articles;
-        }
-
-        throw new IllegalStateException(reason);
-    }
-
-    private static final class CachedArticles {
-        private final List<ResearchArticle> articles;
-        private final long fetchedAt;
-
-        private CachedArticles(List<ResearchArticle> articles, long fetchedAt) {
-            this.articles = articles;
-            this.fetchedAt = fetchedAt;
-        }
-    }
+    private record FeedSource(String name, String url) {}
 }
