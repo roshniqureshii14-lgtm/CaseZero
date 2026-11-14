@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASEZERO | Something went wrong</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
+<main class="research-page">
+    <section class="research-intro">
+        <span class="hero-label">CASEZERO</span>
+        <h2>We couldn't open that page.</h2>
+        <p>Something interrupted the request. Please return to the homepage and try again.</p>
+        <a class="button" th:href="@{/}">Back to Home</a>
+    </section>
+</main>
+<footer>CASEZERO — Public information. Source attribution. Responsible research.</footer>
+</body>
+</html>

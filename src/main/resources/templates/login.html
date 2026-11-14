@@ -8,17 +8,7 @@
     <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 <body>
-<header>
-    <h1>CASEZERO</h1>
-   
-<nav>
-    <a th:href="@{/}">Home</a>
-    <a th:href="@{/signup}">Sign Up</a>
-    <a th:href="@{/login}">Sign In</a>
-    <a th:href="@{/contact}">Contact Us</a>
-</nav>
-
-</header>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
 
 <main>
     <section class="panel">

@@ -1344,3 +1344,25 @@ footer {
     .research-search button { width: 100%; }
     .research-grid { grid-template-columns: 1fr; }
 }
+
+/* Shared navigation refinements */
+.site-brand {
+    color: inherit;
+    text-decoration: none;
+}
+.site-brand h1 {
+    margin: 0;
+}
+nav a {
+    white-space: nowrap;
+}
+
+/* Friendly Research Feed error state */
+.research-error {
+    padding: 15px 18px;
+    margin: 18px 0;
+    color: #ffc0c4;
+    background: rgba(217, 67, 80, 0.12);
+    border: 1px solid rgba(217, 67, 80, 0.38);
+    border-radius: 9px;
+}

@@ -40,17 +40,7 @@
 <body>
 
 <!-- HEADER -->
-<header>
-    <h1>CASEZERO</h1>
-
-    <nav>
-        <a th:href="@{/}">Home</a>
-        <a th:href="@{/signup}">Sign Up</a>
-        <a th:href="@{/login}">Sign In</a>
-        <a th:href="@{/contact}">Contact Us</a>
-        <a th:href="@{/research}">Research Feed</a>
-    </nav>
-</header>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
 
 <!-- GUEST AND MEMBER DASHBOARD -->
 <div th:class="${loggedIn} ? 'member-layout' : 'guest-layout'">

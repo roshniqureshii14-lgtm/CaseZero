@@ -3,63 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CASEZERO | Public Research Feed</title>
+    <title>CASEZERO | Research Feed</title>
     <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 <body>
-<header>
-    <h1>CASEZERO</h1>
-    <nav>
-        <a th:href="@{/}">Home</a>
-        <a th:href="@{/research}" aria-current="page">Research Feed</a>
-        <a th:href="@{/contact}">Contact Us</a>
-        <a th:href="@{/signup}">Sign Up</a>
-        <a th:href="@{/login}">Sign In</a>
-    </nav>
-</header>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
 
 <main class="research-page">
     <section class="research-intro">
-        <span class="hero-label">EXTERNAL API INTEGRATION</span>
-        <h2>Public Research Feed</h2>
+        <span class="hero-label">PUBLIC INFORMATION</span>
+        <h2>Research Feed</h2>
         <p>
-            Discover recent news coverage related to unresolved cases and
-            missing-person issues in Pakistan. Results are retrieved live
-            from the GDELT DOC 2.0 news search API.
+            Explore recent news coverage related to missing persons,
+            unidentified persons and unresolved incidents in Pakistan.
+            Use these reports as starting points for further research.
         </p>
+
         <form class="research-search" method="get" th:action="@{/research}">
-            <label for="q">Search topic</label>
+            <label for="q">What would you like to research?</label>
             <input id="q" name="q" type="search" maxlength="80"
                    placeholder="e.g. missing persons, unidentified bodies, unsolved crime"
                    th:value="${searchTerm}" required>
-            <button type="submit">Search Public Reports</button>
+            <button type="submit">Search Reports</button>
         </form>
         <p class="research-note">
-            Search results are external news reports and research leads.
-            They are not verified CASEZERO cases and are not automatically
-            added to the case archive. Always review the original source.
+            These are reports published by external news sources. They are not
+            verified CASEZERO cases and are not automatically added to the case archive.
+            Please check the original report before relying on its information.
         </p>
     </section>
 
     <section class="research-results">
         <div class="research-results-heading">
             <div>
-                <span class="hero-label">LIVE SEARCH RESULTS</span>
+                <span class="hero-label">RECENT COVERAGE</span>
                 <h2 th:text="'Results for: ' + ${searchTerm}">Search results</h2>
             </div>
-            <span class="research-source">Powered by GDELT DOC 2.0</span>
+            <span class="research-source">News source: GDELT</span>
         </div>
 
-        <div class="success-message" th:if="${apiError}" th:text="${apiError}"></div>
+        <div class="research-error" role="status" th:if="${apiError}" th:text="${apiError}"></div>
 
         <div class="research-empty"
              th:if="${#lists.isEmpty(articles) and apiError == null}">
-            No matching reports were returned. Try a different search phrase.
+            No matching reports were found in the selected search period.
+            Try a shorter or different search phrase.
         </div>
 
         <div class="research-grid" th:if="${!#lists.isEmpty(articles)}">
             <article class="research-card" th:each="article : ${articles}">
-                <span class="research-card-label">EXTERNAL SOURCE</span>
+                <span class="research-card-label">NEWS REPORT</span>
                 <h3 th:text="${article.title}">Article headline</h3>
                 <p class="research-meta">
                     <span th:text="${article.source}">Source</span>
