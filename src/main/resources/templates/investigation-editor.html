@@ -23,7 +23,7 @@
 .workspace-section h2{font-size:17px;margin:0 0 8px}
 .private-callout{padding:13px 15px;border-left:3px solid #d94350;background:rgba(217,67,80,.09);color:#d8d9df;font-size:13px;line-height:1.65;border-radius:0 8px 8px 0}
 .upload-zone{border:1px dashed rgba(240,128,145,.55);border-radius:12px;padding:22px;text-align:center;background:rgba(217,67,80,.045)}
-.upload-zone:focus{outline:2px solid #d94350;outline-offset:3px}
+.upload-zone:focus{outline:2px solid #d94350;outline-offset:3px}.upload-zone.dragging{border-color:#f08091;background:rgba(217,67,80,.13)}
 .upload-zone p{font-size:13px;margin:6px 0}
 .upload-zone input{max-width:100%;margin-top:12px}
 .upload-zone button{margin-top:12px}
@@ -177,14 +177,38 @@ document.addEventListener("DOMContentLoaded", function () {
         showSelection(input.files[0]);
     });
 
+    const uploadZone = document.getElementById("evidenceUpload");
+    uploadZone.addEventListener("dragover", function (event) {
+        event.preventDefault();
+        uploadZone.classList.add("dragging");
+    });
+    uploadZone.addEventListener("dragleave", function () {
+        uploadZone.classList.remove("dragging");
+    });
+    uploadZone.addEventListener("drop", function (event) {
+        event.preventDefault();
+        uploadZone.classList.remove("dragging");
+        const dropped = event.dataTransfer.files[0];
+        if (!dropped) return;
+        const transfer = new DataTransfer();
+        transfer.items.add(dropped);
+        input.files = transfer.files;
+        showSelection(dropped);
+    });
+
     pasteTarget.addEventListener("click", function () {
         pasteTarget.focus();
     });
 
     pasteTarget.addEventListener("paste", function (event) {
+        event.preventDefault();
         const items = Array.from((event.clipboardData || {}).items || []);
         const imageItem = items.find(item => item.type.startsWith("image/"));
-        if (!imageItem) return;
+        if (!imageItem) {
+            name.textContent = "Copy an image first, then press Ctrl + V here.";
+            preview.style.display = "block";
+            return;
+        }
         const pasted = imageItem.getAsFile();
         if (!pasted) return;
         const extension = pasted.type === "image/png" ? "png" : (pasted.type === "image/webp" ? "webp" : "jpg");
@@ -193,7 +217,6 @@ document.addEventListener("DOMContentLoaded", function () {
         transfer.items.add(file);
         input.files = transfer.files;
         showSelection(file);
-        event.preventDefault();
     });
 });
 </script>
