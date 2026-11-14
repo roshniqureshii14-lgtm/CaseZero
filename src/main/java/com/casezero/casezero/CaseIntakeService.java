@@ -29,7 +29,8 @@ public class CaseIntakeService {
         int saved = 0;
         for (ResearchArticle article : articles) {
             if (article.url() != null && article.url().startsWith("https://")
-                    && !reportRepository.existsBySourceUrl(article.url())) {
+                    && !reportRepository.existsBySourceUrl(article.url())
+                    && !reportRepository.existsByTitleIgnoreCase(article.title())) {
                 reportRepository.save(new CaseResearchReport(article));
                 saved++;
             }
