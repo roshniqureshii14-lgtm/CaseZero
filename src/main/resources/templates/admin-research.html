@@ -17,22 +17,22 @@
 <body>
 <header th:replace="~{fragments/header :: siteHeader}"></header>
 <main class="admin-research-page">
-<span class="hero-label">ADMINISTRATION</span><h2>Research report review</h2>
-<p>Collect recent Pakistan-related news reports from GDELT. Results are stored privately here.
-Nothing is published until an administrator checks the original source and approves it.</p>
+<span class="hero-label">ADMINISTRATION</span><h2>Multi-source case discovery</h2>
+<p>Collect public reports from seven configured Pakistani publisher RSS feeds. Reports remain private in this review queue until an administrator checks the original source and approves them.</p>
 <div class="admin-alert admin-success" th:if="${successMessage}" th:text="${successMessage}"></div>
 <div class="admin-alert admin-error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 <form method="post" th:action="@{/admin/research/collect}">
-<button type="submit">Collect new reports from GDELT</button></form>
-<p class="admin-note">One API request is made per collection. Wait before trying again if GDELT rate-limits the request.</p>
+<button type="submit">Collect reports from all publisher feeds</button></form>
+<p class="admin-note">Automatic collection also runs every six hours. A publisher failure is logged and skipped; other feeds continue.</p>
 <h3>Pending reports (<span th:text="${#lists.size(reports)}">0</span>)</h3>
-<p th:if="${#lists.isEmpty(reports)}" class="admin-note">No pending reports. Use the collection button to search for new reports.</p>
+<p th:if="${#lists.isEmpty(reports)}" class="admin-note">No pending reports yet. Run collection or wait for the next scheduled collection.</p>
 <article class="admin-report" th:each="report : ${reports}">
 <strong>PENDING — NOT A VERIFIED CASE</strong>
 <h3 th:text="${report.title}">Report title</h3>
 <p><span th:text="${report.sourceName}">Source</span> · <span th:text="${report.publishedAt}">Date</span></p>
+<p th:if="${report.description != null}" th:text="${report.description}"></p>
 <p><a th:href="${report.sourceUrl}" target="_blank" rel="noopener noreferrer">Open original report ↗</a></p>
-<p class="admin-note">Check the original article. Enter only information supported by the source. Do not infer guilt or current missing status.</p>
+<p class="admin-note">Verify the original article. Enter only details supported by the source. Do not infer guilt or current missing status.</p>
 <form method="post" th:action="@{/admin/research/{id}/approve(id=${report.id})}">
 <label>Case category<select name="category" required>
 <option value="">Select a category</option><option>Missing Persons</option><option>Unidentified Persons</option>
