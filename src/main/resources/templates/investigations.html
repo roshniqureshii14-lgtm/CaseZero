@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CASEZERO | My Investigations</title><link rel="stylesheet" th:href="@{/style.css}">
+<style>
+.workspace{max-width:1050px;margin:45px auto;padding:0 22px}.workspace-head{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}.draft-list{display:grid;gap:15px;margin-top:28px}.draft-item{background:#1d2026;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:22px}.draft-meta{display:flex;gap:12px;flex-wrap:wrap;color:#a9adb6;font-size:13px}.draft-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:15px}.draft-actions form{margin:0}.draft-actions button{margin-top:0}.secondary-link{color:#f08091;text-decoration:none;font-size:14px}.status{color:#f08091;font-size:12px;letter-spacing:1px;font-weight:bold}.notice{padding:13px 16px;border:1px solid #397b5b;border-radius:8px;color:#9be0b7;margin:20px 0}.empty{padding:30px;text-align:center;border:1px dashed #41444d;border-radius:12px;margin-top:25px}
+</style></head>
+<body><header th:replace="~{fragments/header :: siteHeader}"></header>
+<main class="workspace">
+<div class="workspace-head"><div><p class="eyebrow">MEMBER WORKSPACE</p><h1>My Investigations</h1><p>Private research drafts connected to public CASEZERO case records.</p></div><a class="button" th:href="@{/}">Browse Case Archive</a></div>
+<div class="notice" th:if="${successMessage}" th:text="${successMessage}"></div>
+<section class="draft-list" th:if="${!#lists.isEmpty(drafts)}">
+<article class="draft-item" th:each="draft : ${drafts}">
+<div class="status" th:text="${draft.status.replace('_', ' ')}">DRAFT</div><h2 th:text="${draft.title}">Investigation title</h2>
+<div class="draft-meta"><span th:text="${'Case: ' + draft.caseRecord.title}">Case</span><span th:text="${'Updated: ' + #temporals.format(draft.updatedAt, 'dd MMM yyyy HH:mm')}">Updated</span></div>
+<div class="draft-actions"><a class="secondary-link" th:if="${draft.status == 'DRAFT'}" th:href="@{/investigations/{id}/edit(id=${draft.id})}">Edit draft</a>
+<form th:if="${draft.status == 'DRAFT'}" th:action="@{/investigations/{id}/submit(id=${draft.id})}" method="post"><button type="submit">Submit for review</button></form>
+<span class="draft-meta" th:if="${draft.status == 'PENDING_REVIEW'}">Submitted — still private while awaiting review.</span></div>
+</article></section>
+<section class="empty" th:if="${#lists.isEmpty(drafts)}"><h2>No investigations yet</h2><p>Open a case from the archive and start a private investigation draft.</p></section>
+</main></body></html>
