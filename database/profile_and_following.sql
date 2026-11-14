@@ -2,6 +2,7 @@
 -- Run this once in the Supabase SQL Editor.
 
 ALTER TABLE public.app_users
+    ADD COLUMN IF NOT EXISTS public_id VARCHAR(20),
     ADD COLUMN IF NOT EXISTS bio VARCHAR(300),
     ADD COLUMN IF NOT EXISTS location VARCHAR(100);
 
