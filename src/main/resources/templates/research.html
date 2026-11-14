@@ -8,70 +8,50 @@
 </head>
 <body>
 <header th:replace="~{fragments/header :: siteHeader}"></header>
-
 <main class="research-page">
     <section class="research-intro">
         <span class="hero-label">PUBLIC INFORMATION</span>
-        <h2>Research Feed</h2>
-        <p>
-            Explore recent news coverage related to missing persons,
-            unidentified persons and unresolved incidents in Pakistan.
-            Use these reports as starting points for further research.
-        </p>
-
+        <h2>Pakistan Case Discovery</h2>
+        <p>Search recent public reporting from multiple Pakistani publishers. Matching articles are research leads, not verified cases.</p>
         <form class="research-search" method="get" th:action="@{/research}">
-            <label for="q">What would you like to research?</label>
+            <label for="q">Search reports</label>
             <input id="q" name="q" type="search" maxlength="80"
-                   placeholder="e.g. missing persons, unidentified bodies, unsolved crime"
+                   placeholder="e.g. missing persons, unidentified body, unsolved crime"
                    th:value="${searchTerm}" required>
-            <button type="submit">Search Reports</button>
+            <button type="submit">Search Publisher Feeds</button>
         </form>
-        <p class="research-note">
-            These are reports published by external news sources. They are not
-            verified CASEZERO cases and are not automatically added to the case archive.
-            Please check the original report before relying on its information.
-        </p>
+        <p class="research-note">Sources include Dawn, Express Tribune, The Nation, Jang, The News International, UrduPoint and Express Urdu. Only article metadata and original links are displayed.</p>
     </section>
-
     <section class="research-results">
         <div class="research-results-heading">
             <div>
-                <span class="hero-label">RECENT COVERAGE</span>
+                <span class="hero-label">MULTI-SOURCE RESULTS</span>
                 <h2 th:if="${searchPerformed}" th:text="'Results for: ' + ${searchTerm}">Search results</h2>
                 <h2 th:unless="${searchPerformed}">Search when you're ready</h2>
             </div>
-            <span class="research-source">News source: GDELT</span>
+            <span class="research-source">7 configured publishers</span>
         </div>
-
         <div class="research-error" role="status" th:if="${apiError}" th:text="${apiError}"></div>
-
         <div class="research-empty" th:if="${!searchPerformed}">
-            Enter a topic above and select Search Reports. CASEZERO will contact
-            the external news service only when you submit a search.
+            Enter a topic above and search. Each publisher is queried independently, so one unavailable feed will not stop the others.
         </div>
-
-        <div class="research-empty"
-             th:if="${searchPerformed and #lists.isEmpty(articles) and apiError == null}">
-            No matching reports were found in the selected search period.
-            Try a shorter or different search phrase.
+        <div class="research-empty" th:if="${searchPerformed and #lists.isEmpty(articles) and apiError == null}">
+            No matching recent articles were found in the configured feeds. This does not mean no such cases exist.
         </div>
-
         <div class="research-grid" th:if="${!#lists.isEmpty(articles)}">
             <article class="research-card" th:each="article : ${articles}">
-                <span class="research-card-label">NEWS REPORT</span>
+                <span class="research-card-label">UNVERIFIED NEWS LEAD</span>
                 <h3 th:text="${article.title}">Article headline</h3>
+                <p th:if="${!#strings.isEmpty(article.description)}" th:text="${article.description}">Article summary</p>
                 <p class="research-meta">
                     <span th:text="${article.source}">Source</span>
-                    <span th:if="${!#strings.isEmpty(article.publishedAt)}"
-                          th:text="${article.publishedAt}">Publication date</span>
+                    <span th:if="${!#strings.isEmpty(article.publishedAt)}" th:text="${article.publishedAt}">Publication date</span>
                 </p>
-                <a class="button" th:href="${article.url}" target="_blank"
-                   rel="noopener noreferrer">Read Original Report ↗</a>
+                <a class="button" th:href="${article.url}" target="_blank" rel="noopener noreferrer">Read Original Report ↗</a>
             </article>
         </div>
     </section>
 </main>
-
 <footer th:replace="~{fragments/footer :: siteFooter}"></footer>
 </body>
 </html>
