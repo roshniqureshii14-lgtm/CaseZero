@@ -1366,3 +1366,44 @@ nav a {
     border: 1px solid rgba(217, 67, 80, 0.38);
     border-radius: 9px;
 }
+
+
+/* CASEZERO workspace milestone: collapsible member dashboard */
+.dashboard-layout { transition: grid-template-columns .28s ease; }
+.dashboard-toolbar {
+    display:flex; align-items:center; gap:14px; padding:14px 28px 0;
+    color:#777d88; font-size:10px; letter-spacing:2px;
+}
+.sidebar-toggle {
+    width:auto; margin:0; padding:9px 13px; background:#252932;
+    border:1px solid rgba(255,255,255,.13); color:#f1f1f3; font-size:12px;
+}
+.sidebar-toggle:hover { background:#3a2229; }
+.dashboard-layout.sidebar-collapsed { grid-template-columns:0 minmax(0,1fr); }
+.dashboard-layout.sidebar-collapsed .dashboard-sidebar {
+    width:0; min-width:0; padding-left:0; padding-right:0; overflow:hidden;
+    opacity:0; border:0; pointer-events:none;
+}
+.dashboard-sidebar {
+    overflow:hidden;
+    transition:width .28s ease, padding .28s ease, opacity .2s ease;
+}
+.dashboard-sidebar .sidebar-link { white-space:nowrap; }
+.category-card { color:inherit; text-decoration:none; }
+.category-card .category-action {
+    display:inline-block; color:#f08091; font-size:12px; font-weight:700; margin-top:15px;
+}
+.category-card:hover .category-action { color:#fff; }
+.header-logout-form { margin:0; }
+.header-logout-form .header-logout { margin:0; width:auto; }
+@media(max-width:768px) {
+    .dashboard-layout.sidebar-collapsed { grid-template-columns:1fr; }
+    .dashboard-layout.sidebar-collapsed .dashboard-sidebar {
+        max-height:0; padding-top:0; padding-bottom:0;
+    }
+    .dashboard-sidebar {
+        max-height:900px;
+        transition:max-height .28s ease, padding .28s ease, opacity .2s ease;
+    }
+    .dashboard-toolbar { padding:14px 5% 0; flex-wrap:wrap; }
+}
