@@ -56,9 +56,9 @@ public class SupabaseStorageService {
 
         String storedName = UUID.randomUUID() + "_" + original;
         String objectPath = "investigations/" + draftId + "/" + storedName;
-        HttpRequest request = HttpRequest.newBuilder(objectUri(objectPath))
-                .header("Authorization", "Bearer " + secretKey)
-                .header("apikey", secretKey)
+        HttpRequest.Builder uploadRequest = HttpRequest.newBuilder(objectUri(objectPath));
+        addApiCredentials(uploadRequest);
+        HttpRequest request = uploadRequest
                 .header("Content-Type", contentType)
                 .header("x-upsert", "false")
                 .POST(HttpRequest.BodyPublishers.ofByteArray(bytes))
@@ -81,11 +81,9 @@ public class SupabaseStorageService {
 
     public byte[] download(String objectPath) {
         ensureConfigured();
-        HttpRequest request = HttpRequest.newBuilder(authenticatedObjectUri(objectPath))
-                .header("Authorization", "Bearer " + secretKey)
-                .header("apikey", secretKey)
-                .GET()
-                .build();
+        HttpRequest.Builder downloadRequest = HttpRequest.newBuilder(authenticatedObjectUri(objectPath));
+        addApiCredentials(downloadRequest);
+        HttpRequest request = downloadRequest.GET().build();
         try {
             HttpResponse<byte[]> response = http.send(request, HttpResponse.BodyHandlers.ofByteArray());
             if (response.statusCode() != 200) {
@@ -103,9 +101,9 @@ public class SupabaseStorageService {
     public void delete(String objectPath) {
         ensureConfigured();
         String json = "{\"prefixes\":[\"" + objectPath.replace("\\", "") + "\"]}";
-        HttpRequest request = HttpRequest.newBuilder(URI.create(projectUrl + "/storage/v1/object/" + encode(bucket)))
-                .header("Authorization", "Bearer " + secretKey)
-                .header("apikey", secretKey)
+        HttpRequest.Builder deleteRequest = HttpRequest.newBuilder(URI.create(projectUrl + "/storage/v1/object/" + encode(bucket)));
+        addApiCredentials(deleteRequest);
+        HttpRequest request = deleteRequest
                 .header("Content-Type", "application/json")
                 .method("DELETE", HttpRequest.BodyPublishers.ofString(json))
                 .build();
@@ -119,6 +117,15 @@ public class SupabaseStorageService {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("The delete request was interrupted.", ex);
+        }
+    }
+
+    private void addApiCredentials(HttpRequest.Builder request) {
+        request.header("apikey", secretKey);
+        // Legacy service_role keys are JWTs. New sb_secret keys must be sent
+        // only as apikey headers, never as Bearer tokens.
+        if (secretKey.startsWith("eyJ")) {
+            request.header("Authorization", "Bearer " + secretKey);
         }
     }
 
