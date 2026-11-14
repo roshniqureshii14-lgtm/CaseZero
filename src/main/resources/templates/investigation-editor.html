@@ -110,7 +110,7 @@
                             <p id="selectedFileName"></p>
                             <img id="selectedImagePreview" alt="Selected image preview" hidden>
                         </div>
-                        <p class="hint" tabindex="0" id="pasteTarget">You can also click here and press Ctrl + V to paste a copied image.</p>
+                        <div class="hint" tabindex="0" contenteditable="true" role="textbox" aria-label="Paste a copied image here" id="pasteTarget">Click here and press Ctrl + V to paste a copied image.</div>
                         <button type="submit">Upload Evidence</button>
                     </form>
 
@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!imageItem) return;
         const pasted = imageItem.getAsFile();
         if (!pasted) return;
-        const extension = pasted.type === "image/png" ? "png" : "jpg";
+        const extension = pasted.type === "image/png" ? "png" : (pasted.type === "image/webp" ? "webp" : "jpg");
         const file = new File([pasted], "pasted-evidence-" + Date.now() + "." + extension, {type:pasted.type});
         const transfer = new DataTransfer();
         transfer.items.add(file);
