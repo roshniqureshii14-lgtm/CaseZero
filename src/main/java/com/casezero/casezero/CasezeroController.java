@@ -27,17 +27,20 @@ public class CasezeroController {
     private final ContactMessageRepository contactRepository;
     private final PasswordEncoder passwordEncoder;
     private final CaseRecordRepository caseRecordRepository;
+    private final CaseCommentRepository caseCommentRepository;
 
     public CasezeroController(
             UserAccountRepository repository,
             ContactMessageRepository contactRepository,
             PasswordEncoder passwordEncoder,
-            CaseRecordRepository caseRecordRepository) {
+            CaseRecordRepository caseRecordRepository,
+            CaseCommentRepository caseCommentRepository) {
 
         this.repository = repository;
         this.contactRepository = contactRepository;
         this.passwordEncoder = passwordEncoder;
         this.caseRecordRepository = caseRecordRepository;
+        this.caseCommentRepository = caseCommentRepository;
     }
 
     // HOME PAGE: GUEST AND MEMBER DASHBOARD
@@ -127,8 +130,44 @@ public class CasezeroController {
 
         model.addAttribute("caseRecord", caseRecord);
         model.addAttribute("loggedIn", principal != null);
+        model.addAttribute("comments", caseCommentRepository.findByCaseRecord_IdOrderByCreatedAtAsc(id));
+        model.addAttribute("commentForm", new CaseCommentForm());
 
         return "case-details";
+    }
+
+    // PUBLIC COMMENTS: READ ACCESS IS PUBLIC; POSTING REQUIRES SIGN-IN
+    @PostMapping("/cases/{id}/comments")
+    public String postCaseComment(
+            @PathVariable Long id,
+            @Valid @ModelAttribute("commentForm") CaseCommentForm form,
+            BindingResult result,
+            Principal principal,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        CaseRecord caseRecord = caseRecordRepository.findById(id)
+                .filter(CaseRecord::isPublished)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Case record not found."));
+
+        if (result.hasErrors()) {
+            model.addAttribute("caseRecord", caseRecord);
+            model.addAttribute("loggedIn", true);
+            model.addAttribute("comments", caseCommentRepository.findByCaseRecord_IdOrderByCreatedAtAsc(id));
+            return "case-details";
+        }
+
+        UserAccount author = repository.findByEmailIgnoreCase(principal.getName())
+                .orElseThrow(() -> new IllegalStateException("Logged-in account was not found."));
+        CaseComment comment = new CaseComment();
+        comment.setCaseRecord(caseRecord);
+        comment.setAuthor(author);
+        comment.setContent(form.getContent().trim());
+        caseCommentRepository.save(comment);
+
+        redirectAttributes.addFlashAttribute("commentSuccess", "Your comment has been posted.");
+        return "redirect:/cases/" + id + "#comments";
     }
 
     // REGISTRATION
