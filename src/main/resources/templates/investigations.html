@@ -26,9 +26,9 @@
 <div class="workspace-head"><div><p class="eyebrow">MEMBER WORKSPACE</p><h1>My Investigations</h1><p>Manage your private research drafts and submissions.</p></div><a class="button" th:href="@{/#archive}">Browse Case Archive</a></div>
 <div class="notice" th:if="${successMessage}" th:text="${successMessage}"></div>
 <nav class="tabs" aria-label="Investigation filters">
-<a class="tab" th:classappend="${view == 'all'} ? ' active'" th:href="@{/investigations}">All activity</a>
-<a class="tab" th:classappend="${view == 'drafts'} ? ' active'" th:href="@{/investigations(view='drafts')}">My Drafts</a>
-<a class="tab" th:classappend="${view == 'submitted'} ? ' active'" th:href="@{/investigations(view='submitted')}">Submitted Reports</a>
+<a class="tab" th:classappend="${view == 'all'} ? ' active' : ''" th:href="@{/investigations}">All activity</a>
+<a class="tab" th:classappend="${view == 'drafts'} ? ' active' : ''" th:href="@{/investigations(view='drafts')}">My Drafts</a>
+<a class="tab" th:classappend="${view == 'submitted'} ? ' active' : ''" th:href="@{/investigations(view='submitted')}">Submitted Reports</a>
 <a class="tab" th:href="@{/investigations/evidence}">Evidence Vault</a>
 </nav>
 <section class="draft-list" th:if="${!#lists.isEmpty(drafts)}">
