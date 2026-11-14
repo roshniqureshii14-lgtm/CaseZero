@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CASEZERO | Report Review</title><link rel="stylesheet" th:href="@{/style.css}">
+<style>
+.admin-research-page{width:min(1100px,92%);margin:3rem auto}
+.admin-report{border:1px solid #383838;border-radius:12px;padding:1.25rem;margin:1.25rem 0;background:#171717}
+.admin-report form{display:grid;gap:.75rem;margin-top:1rem}
+.admin-report label{display:grid;gap:.35rem}
+.admin-report input,.admin-report select,.admin-report textarea{width:100%;padding:.75rem}
+.admin-report textarea{min-height:110px;resize:vertical}
+.admin-note{color:#bbb;font-size:.92rem}
+.admin-alert{padding:.8rem 1rem;border-radius:8px;margin:1rem 0}
+.admin-success{background:#173321}.admin-error{background:#421e25}
+</style></head>
+<body>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
+<main class="admin-research-page">
+<span class="hero-label">ADMINISTRATION</span><h2>Research report review</h2>
+<p>Collect recent Pakistan-related news reports from GDELT. Results are stored privately here.
+Nothing is published until an administrator checks the original source and approves it.</p>
+<div class="admin-alert admin-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+<div class="admin-alert admin-error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+<form method="post" th:action="@{/admin/research/collect}">
+<button type="submit">Collect new reports from GDELT</button></form>
+<p class="admin-note">One API request is made per collection. Wait before trying again if GDELT rate-limits the request.</p>
+<h3>Pending reports (<span th:text="${#lists.size(reports)}">0</span>)</h3>
+<p th:if="${#lists.isEmpty(reports)}" class="admin-note">No pending reports. Use the collection button to search for new reports.</p>
+<article class="admin-report" th:each="report : ${reports}">
+<strong>PENDING — NOT A VERIFIED CASE</strong>
+<h3 th:text="${report.title}">Report title</h3>
+<p><span th:text="${report.sourceName}">Source</span> · <span th:text="${report.publishedAt}">Date</span></p>
+<p><a th:href="${report.sourceUrl}" target="_blank" rel="noopener noreferrer">Open original report ↗</a></p>
+<p class="admin-note">Check the original article. Enter only information supported by the source. Do not infer guilt or current missing status.</p>
+<form method="post" th:action="@{/admin/research/{id}/approve(id=${report.id})}">
+<label>Case category<select name="category" required>
+<option value="">Select a category</option><option>Missing Persons</option><option>Unidentified Persons</option>
+<option>Unsolved Crimes</option><option>Other Unresolved Cases</option></select></label>
+<label>Location<input name="location" maxlength="120" required placeholder="e.g. Karachi, Sindh"></label>
+<label>Neutral case summary<textarea name="summary" maxlength="1200" required></textarea></label>
+<button type="submit">Approve and publish case</button>
+</form>
+<form method="post" th:action="@{/admin/research/{id}/reject(id=${report.id})}">
+<button type="submit">Reject report</button></form>
+</article></main>
+<footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body></html>
