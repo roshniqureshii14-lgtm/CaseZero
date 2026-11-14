@@ -45,7 +45,7 @@ public class AdminResearchController {
                     saved + " new report(s) saved to the review queue. Duplicate source links were skipped.");
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "The external news service could not be reached. Wait before trying again.");
+                    "No configured publisher feed returned usable data. Check the application log; individual feed failures do not stop other publishers.");
         }
         return "redirect:/admin/research";
     }

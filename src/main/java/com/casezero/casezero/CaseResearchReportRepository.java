@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CaseResearchReportRepository extends JpaRepository<CaseResearchReport, Long> {
     boolean existsBySourceUrl(String sourceUrl);
+    boolean existsByTitleIgnoreCase(String title);
     List<CaseResearchReport> findAllByStatusOrderByCollectedAtDesc(String status);
 }
