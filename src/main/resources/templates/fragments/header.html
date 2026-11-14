@@ -1,10 +1,11 @@
-<header th:fragment="siteHeader">
+<header th:fragment="siteHeader" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <a class="site-brand" th:href="@{/}" aria-label="CASEZERO home">
         <h1>CASEZERO</h1>
     </a>
     <nav aria-label="Main navigation">
         <a th:href="@{/}">Home</a>
         <a th:href="@{/research}">Research Feed</a>
+        <a sec:authorize="isAuthenticated()" th:href="@{/investigations}">My Investigations</a>
         <a th:href="@{/signup}">Sign Up</a>
         <a th:href="@{/login}">Sign In</a>
         <a th:href="@{/contact}">Contact Us</a>
