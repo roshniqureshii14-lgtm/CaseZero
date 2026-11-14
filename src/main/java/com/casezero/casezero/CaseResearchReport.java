@@ -17,6 +17,8 @@ public class CaseResearchReport {
     private String sourceUrl;
     @Column(name = "published_at", length = 80)
     private String publishedAt;
+    @Column(columnDefinition = "TEXT")
+    private String description;
     @Column(nullable = false, length = 30)
     private String status = "PENDING";
     @Column(name = "collected_at", nullable = false)
@@ -29,6 +31,7 @@ public class CaseResearchReport {
         this.sourceName = article.source();
         this.sourceUrl = article.url();
         this.publishedAt = article.publishedAt();
+        this.description = article.description();
         this.status = "PENDING";
         this.collectedAt = LocalDateTime.now();
     }
@@ -43,6 +46,7 @@ public class CaseResearchReport {
     public String getSourceName() { return sourceName; }
     public String getSourceUrl() { return sourceUrl; }
     public String getPublishedAt() { return publishedAt; }
+    public String getDescription() { return description; }
     public String getStatus() { return status; }
     public LocalDateTime getCollectedAt() { return collectedAt; }
     public void setStatus(String status) { this.status = status; }
