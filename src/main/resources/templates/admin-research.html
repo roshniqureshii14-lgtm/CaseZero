@@ -32,13 +32,18 @@
 <p><span th:text="${report.sourceName}">Source</span> · <span th:text="${report.publishedAt}">Date</span></p>
 <p th:if="${report.description != null}" th:text="${report.description}"></p>
 <p><a th:href="${report.sourceUrl}" target="_blank" rel="noopener noreferrer">Open original report ↗</a></p>
-<p class="admin-note">Verify the original article. Enter only details supported by the source. Do not infer guilt or current missing status.</p>
+<p class="admin-note">Verify the original article. CASEZERO pre-fills a suggested category, location (when detected), and summary from the article. Verify and correct every field against the original source before approval. Do not infer guilt or current missing status.</p>
 <form method="post" th:action="@{/admin/research/{id}/approve(id=${report.id})}">
 <label>Case category<select name="category" required>
-<option value="">Select a category</option><option>Missing Persons</option><option>Unidentified Persons</option>
-<option>Unsolved Crimes</option><option>Other Unresolved Cases</option></select></label>
-<label>Location<input name="location" maxlength="120" required placeholder="e.g. Karachi, Sindh"></label>
-<label>Neutral case summary<textarea name="summary" maxlength="1200" required></textarea></label>
+<option value="">Select a category</option>
+<option value="Missing Persons" th:selected="${suggestions[report.id].category == 'Missing Persons'}">Missing Persons</option>
+<option value="Unidentified Persons" th:selected="${suggestions[report.id].category == 'Unidentified Persons'}">Unidentified Persons</option>
+<option value="Unsolved Crimes" th:selected="${suggestions[report.id].category == 'Unsolved Crimes'}">Unsolved Crimes</option>
+<option value="Other Unresolved Cases" th:selected="${suggestions[report.id].category == 'Other Unresolved Cases'}">Other Unresolved Cases</option></select></label>
+<label>Suggested location<input name="location" maxlength="120" required
+th:value="${suggestions[report.id].location}" placeholder="Not detected — verify the article and enter the location"></label>
+<label>Suggested neutral summary<textarea name="summary" maxlength="1200" required
+th:text="${suggestions[report.id].summary}"></textarea></label>
 <button type="submit">Approve and publish case</button>
 </form>
 <form method="post" th:action="@{/admin/research/{id}/reject(id=${report.id})}">
