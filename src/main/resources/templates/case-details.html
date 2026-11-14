@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title th:text="${'CASEZERO | ' + caseRecord.title}">
+    <link rel="stylesheet" th:href="@{/style.css}">\n    <title th:text="${'CASEZERO | ' + caseRecord.title}">
         CASEZERO | Case Details
     </title>
 
@@ -468,23 +468,6 @@
 
     </section>
 
-    <section class="start-investigation-panel" th:if="${loggedIn}">
-        <div>
-            <div class="eyebrow">YOUR PRIVATE WORKSPACE</div>
-            <h2>Have useful information about this case?</h2>
-            <p>Create a private investigation draft, record sourced findings and attach supporting evidence.</p>
-        </div>
-        <a class="start-investigation-button" th:href="@{/investigations/new(caseId=${caseRecord.id})}">＋ Start an Investigation</a>
-    </section>
-    <section class="start-investigation-panel guest-start" th:unless="${loggedIn}">
-        <div>
-            <div class="eyebrow">CONTRIBUTE RESPONSIBLY</div>
-            <h2>Want to research this case?</h2>
-            <p>Sign in to create a private investigation draft and keep your research organized.</p>
-        </div>
-        <a class="start-investigation-button" th:href="@{/login}">Sign in to participate</a>
-    </section>
-
     <!-- MAIN CONTENT AND SIDEBAR -->
     <div class="case-layout">
 
@@ -583,21 +566,68 @@
                     </div>
                 </div>
 
-                <div class="empty-state">
-
-                    <div class="empty-icon">+</div>
-
+                <p class="case-summary">
+                    Read the case record and its original sources first. If you have useful information, you can keep your research in a private workspace linked to this case. Private drafts and evidence are not displayed in this public discussion.
+                </p>
+                <div class="start-investigation-panel" th:if="${loggedIn}">
                     <div>
-                        <strong>Start with your own private research</strong>
-                        <p>
-                            CASEZERO currently lets registered members create private investigation drafts linked to this case.
-                            Add findings, cite public sources and attach supporting files. Submissions remain private while awaiting review;
-                            shared discussions and public community contributions are not available yet.
-                        </p>
+                        <div class="eyebrow">PRIVATE MEMBER WORKSPACE</div>
+                        <h2>Have useful information about this case?</h2>
+                        <p>Create a private investigation draft, record sourced findings and attach supporting evidence. Only you can see your draft while it is being prepared or reviewed.</p>
                     </div>
-
+                    <a class="start-investigation-button" th:href="@{/investigations/new(caseId=${caseRecord.id})}">＋ Start an Investigation</a>
+                </div>
+                <div class="start-investigation-panel guest-start" th:unless="${loggedIn}">
+                    <div>
+                        <div class="eyebrow">PRIVATE MEMBER WORKSPACE</div>
+                        <h2>Want to research this case?</h2>
+                        <p>Sign in or create an account to start a private investigation draft.</p>
+                    </div>
+                    <a class="start-investigation-button" th:href="@{/login}">Sign in to investigate</a>
                 </div>
 
+            </section>
+
+            <!-- PUBLIC COMMENTS -->
+            <section class="content-card" id="comments">
+                <div class="section-heading">
+                    <div class="section-number">04</div>
+                    <div>
+                        <h2>Case Comments</h2>
+                        <div class="section-subtitle">Public discussion — anyone can read; members can post</div>
+                    </div>
+                </div>
+
+                <div class="success-message" th:if="${commentSuccess}" th:text="${commentSuccess}"></div>
+                <div class="comments-list" th:if="${!#lists.isEmpty(comments)}">
+                    <article class="case-comment" th:each="comment : ${comments}">
+                        <div class="comment-meta">
+                            <span class="comment-author" th:text="${comment.author.name}">Member</span>
+                            <time th:text="${#temporals.format(comment.createdAt,'dd MMM yyyy · HH:mm')}">Date</time>
+                        </div>
+                        <p class="comment-body" th:text="${comment.content}">Comment text</p>
+                    </article>
+                </div>
+                <div class="empty-state" th:if="${#lists.isEmpty(comments)}">
+                    <div class="empty-icon">…</div>
+                    <div><strong>No comments yet</strong><p>Be the first member to contribute a respectful, source-aware comment.</p></div>
+                </div>
+
+                <form class="comment-form" th:if="${loggedIn}" th:action="@{/cases/{id}/comments(id=${caseRecord.id})}" th:object="${commentForm}" method="post">
+                    <label for="commentContent">Add a comment</label>
+                    <textarea id="commentContent" th:field="*{content}" maxlength="1500" rows="4" placeholder="Share a relevant observation or ask a respectful question..." required></textarea>
+                    <p class="comment-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></p>
+                    <p class="comment-notice">Do not post private contact details, identifying information about uninvolved people, or unsupported accusations. Comments are public.</p>
+                    <button type="submit">Post Comment</button>
+                </form>
+                <div class="empty-state" th:unless="${loggedIn}">
+                    <div class="empty-icon">i</div>
+                    <div>
+                        <strong>Sign in to join the discussion</strong>
+                        <p>You can read all comments without an account. Sign in is required to post a comment.</p>
+                        <a class="start-investigation-button" th:href="@{/login}">Sign In to Comment</a>
+                    </div>
+                </div>
             </section>
 
             <a class="back-button" th:href="@{/}">
@@ -664,9 +694,7 @@
 
     </div>
 
-    <footer class="page-footer">
-        CASEZERO — Public Information Case Investigation Platform
-    </footer>
+    <footer th:replace="~{fragments/footer :: siteFooter}"></footer>
 
 </main>
 
