@@ -37,15 +37,21 @@
         <div class="research-results-heading">
             <div>
                 <span class="hero-label">RECENT COVERAGE</span>
-                <h2 th:text="'Results for: ' + ${searchTerm}">Search results</h2>
+                <h2 th:if="${searchPerformed}" th:text="'Results for: ' + ${searchTerm}">Search results</h2>
+                <h2 th:unless="${searchPerformed}">Search when you're ready</h2>
             </div>
             <span class="research-source">News source: GDELT</span>
         </div>
 
         <div class="research-error" role="status" th:if="${apiError}" th:text="${apiError}"></div>
 
+        <div class="research-empty" th:if="${!searchPerformed}">
+            Enter a topic above and select Search Reports. CASEZERO will contact
+            the external news service only when you submit a search.
+        </div>
+
         <div class="research-empty"
-             th:if="${#lists.isEmpty(articles) and apiError == null}">
+             th:if="${searchPerformed and #lists.isEmpty(articles) and apiError == null}">
             No matching reports were found in the selected search period.
             Try a shorter or different search phrase.
         </div>
