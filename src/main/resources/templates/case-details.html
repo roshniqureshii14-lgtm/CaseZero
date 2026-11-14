@@ -1,0 +1,638 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${'CASEZERO | ' + caseRecord.title}">
+        CASEZERO | Case Details
+    </title>
+
+    <style>
+        :root {
+            --background: #101114;
+            --surface: #17191e;
+            --surface-light: #1d2026;
+            --border: #2b2e36;
+            --text: #f1f1f3;
+            --muted: #999da8;
+            --crimson: #c8324b;
+            --crimson-soft: rgba(200, 50, 75, 0.12);
+            --green: #6dbb91;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            padding: 35px 28px 70px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--crimson);
+        }
+
+        .breadcrumb .current {
+            color: var(--text);
+        }
+
+        .case-hero {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(115deg, #202128, #17191e 70%);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 38px;
+            margin-bottom: 25px;
+        }
+
+        .case-hero::after {
+            content: "";
+            position: absolute;
+            width: 230px;
+            height: 230px;
+            border: 1px solid rgba(200, 50, 75, 0.15);
+            border-radius: 50%;
+            right: -90px;
+            top: -100px;
+            pointer-events: none;
+        }
+
+        .eyebrow {
+            color: var(--crimson);
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 13px;
+        }
+
+        .case-title {
+            font-size: clamp(27px, 4vw, 42px);
+            line-height: 1.2;
+            letter-spacing: -1px;
+            max-width: 800px;
+            margin: 0 0 17px;
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 23px;
+        }
+
+        .hero-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .hero-bottom {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .category-badge,
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 5px;
+            padding: 6px 11px;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+
+        .category-badge {
+            background: var(--crimson-soft);
+            color: #f08091;
+            border: 1px solid rgba(200, 50, 75, 0.25);
+        }
+
+        .status-badge {
+            background: rgba(109, 187, 145, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(109, 187, 145, 0.2);
+        }
+
+        .case-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 310px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .main-column {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .content-card,
+        .side-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .content-card {
+            padding: 27px 29px;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            margin-bottom: 21px;
+        }
+
+        .section-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+            border-radius: 8px;
+            color: #ef8797;
+            background: var(--crimson-soft);
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .section-heading h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-subtitle {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .case-summary {
+            color: #c5c7ce;
+            font-size: 15px;
+            line-height: 1.9;
+            white-space: pre-line;
+        }
+
+        .source-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 17px;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+        }
+
+        .source-info {
+            min-width: 0;
+        }
+
+        .source-label {
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .source-name {
+            font-size: 14px;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+        .source-link {
+            flex-shrink: 0;
+            color: #f08091;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .source-link:hover {
+            color: white;
+        }
+
+        .empty-state {
+            display: flex;
+            align-items: flex-start;
+            gap: 13px;
+            padding: 17px;
+            background: var(--surface-light);
+            border: 1px dashed #3a3d46;
+            border-radius: 9px;
+        }
+
+        .empty-icon {
+            width: 31px;
+            height: 31px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #292c33;
+            border-radius: 7px;
+            color: #c3c5cc;
+            font-size: 14px;
+        }
+
+        .empty-state strong {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .empty-state p {
+            color: var(--muted);
+            font-size: 12px;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .side-card {
+            padding: 22px;
+        }
+
+        .side-heading {
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .detail-item {
+            margin-bottom: 17px;
+        }
+
+        .detail-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+        .sidebar-note {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #f08091;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .back-button:hover {
+            color: white;
+        }
+
+        .page-footer {
+            border-top: 1px solid var(--border);
+            margin-top: 55px;
+            padding-top: 22px;
+            color: var(--muted);
+            font-size: 11px;
+            text-align: center;
+        }
+
+        @media (max-width: 850px) {
+            .case-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .page-container {
+                padding: 22px 15px 45px;
+            }
+
+            .case-hero {
+                padding: 25px 20px;
+            }
+
+            .content-card {
+                padding: 21px 18px;
+            }
+
+            .sidebar {
+                grid-template-columns: 1fr;
+            }
+
+            .source-card {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: siteHeader}"></header>
+
+<main class="page-container">
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a th:href="@{/}">Home</a>
+        <span>/</span>
+        <a th:href="@{/#archive}">Case Archive</a>
+        <span>/</span>
+        <span class="current">Case Details</span>
+    </nav>
+
+    <!-- CASE HEADER -->
+    <section class="case-hero">
+
+        <div class="eyebrow">CASEZERO / INVESTIGATION RECORD</div>
+
+        <h1 class="case-title" th:text="${caseRecord.title}">
+            Case Title
+        </h1>
+
+        <div class="hero-meta">
+            <span>
+                <span aria-hidden="true">⌖</span>
+                <span th:text="${caseRecord.location}">Location</span>
+            </span>
+
+            <span>
+                <span aria-hidden="true">▤</span>
+                Public Case Record
+            </span>
+
+            <span>
+                <span aria-hidden="true">#</span>
+                <span th:text="${'CZ-' + caseRecord.id}">CZ-001</span>
+            </span>
+        </div>
+
+        <div class="hero-bottom">
+            <span class="category-badge"
+                  th:text="${caseRecord.category}">
+                Category
+            </span>
+
+            <span class="status-badge"
+                  th:text="${caseRecord.status}">
+                Open
+            </span>
+        </div>
+
+    </section>
+
+    <!-- MAIN CONTENT AND SIDEBAR -->
+    <div class="case-layout">
+
+        <div class="main-column">
+
+            <!-- OVERVIEW -->
+            <section class="content-card">
+
+                <div class="section-heading">
+                    <div class="section-number">01</div>
+
+                    <div>
+                        <h2>Case Overview</h2>
+                        <div class="section-subtitle">
+                            Background and available case information
+                        </div>
+                    </div>
+                </div>
+
+                <div class="case-summary"
+                     th:text="${caseRecord.summary}">
+                    Case summary will appear here.
+                </div>
+
+            </section>
+
+            <!-- ORIGINAL SOURCE -->
+            <section class="content-card">
+
+                <div class="section-heading">
+                    <div class="section-number">02</div>
+
+                    <div>
+                        <h2>Original Source</h2>
+                        <div class="section-subtitle">
+                            Reference associated with this case record
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${caseRecord.sourceName != null
+                              and !#strings.isEmpty(caseRecord.sourceName)}"
+                     class="source-card">
+
+                    <div class="source-info">
+                        <div class="source-label">Source publication</div>
+
+                        <div class="source-name"
+                             th:text="${caseRecord.sourceName}">
+                            Source Name
+                        </div>
+                    </div>
+
+                    <a class="source-link"
+                       th:if="${caseRecord.sourceUrl != null
+                               and !#strings.isEmpty(caseRecord.sourceUrl)
+                               and (#strings.startsWith(caseRecord.sourceUrl, 'https://')
+                               or #strings.startsWith(caseRecord.sourceUrl, 'http://'))}"
+                       th:href="${caseRecord.sourceUrl}"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        Visit Source ↗
+                    </a>
+
+                </div>
+
+                <div th:if="${caseRecord.sourceName == null
+                              or #strings.isEmpty(caseRecord.sourceName)}"
+                     class="empty-state">
+
+                    <div class="empty-icon">i</div>
+
+                    <div>
+                        <strong>No source reference added</strong>
+                        <p>
+                            A public source reference has not yet been
+                            attached to this case record.
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- COMMUNITY -->
+            <section class="content-card">
+
+                <div class="section-heading">
+                    <div class="section-number">03</div>
+
+                    <div>
+                        <h2>Community Investigation</h2>
+                        <div class="section-subtitle">
+                            Collaborative research and case discussion
+                        </div>
+                    </div>
+                </div>
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">+</div>
+
+                    <div>
+                        <strong>Community workspace</strong>
+                        <p>
+                            Community investigation submissions and
+                            shared case discussions will appear here
+                            when those features are implemented.
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <a class="back-button" th:href="@{/}">
+                ← Back to Case Archive
+            </a>
+
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <aside class="sidebar">
+
+            <section class="side-card">
+
+                <div class="side-heading">Case File Information</div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Reference Number</span>
+                    <span class="detail-value"
+                          th:text="${'CZ-' + caseRecord.id}">
+                        CZ-001
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Case Category</span>
+                    <span class="detail-value"
+                          th:text="${caseRecord.category}">
+                        Category
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Location</span>
+                    <span class="detail-value"
+                          th:text="${caseRecord.location}">
+                        Location
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Current Status</span>
+                    <span class="detail-value"
+                          th:text="${caseRecord.status}">
+                        Status
+                    </span>
+                </div>
+
+            </section>
+
+            <section class="side-card">
+
+                <div class="side-heading">About This Record</div>
+
+                <p class="sidebar-note">
+                    CASEZERO organizes publicly available information
+                    about unresolved cases in Pakistan. Case records
+                    should be interpreted alongside their original
+                    sources and supporting documentation.
+                </p>
+
+            </section>
+
+        </aside>
+
+    </div>
+
+    <footer class="page-footer">
+        CASEZERO — Public Information Case Investigation Platform
+    </footer>
+
+</main>
+
+</body>
+</html>
