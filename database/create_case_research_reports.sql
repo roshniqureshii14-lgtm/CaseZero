@@ -11,4 +11,7 @@ CREATE TABLE IF NOT EXISTS public.case_research_reports (
 );
 CREATE INDEX IF NOT EXISTS idx_case_research_reports_status_collected
     ON public.case_research_reports (status, collected_at DESC);
--- Do not expose this private review table through the public Supabase Data API.
+-- Keep the review queue private from Supabase's public Data API roles.
+ALTER TABLE public.case_research_reports ENABLE ROW LEVEL SECURITY;
+-- No anon/authenticated policies are created. The app's existing direct PostgreSQL
+-- connection continues to manage this table.
