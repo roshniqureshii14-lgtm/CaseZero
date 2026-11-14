@@ -54,4 +54,5 @@
 <form th:if="${draft.status == 'DRAFT'}" th:action="@{/investigations/{id}/submit(id=${draft.id})}" method="post"><button type="submit">Submit for review</button></form>
 <a class="secondary" th:href="@{/investigations}">Back to My Investigations</a>
 </div>
-</main></body></html>
+</main><footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body></html>
