@@ -1,7 +1,6 @@
 package com.casezero.casezero;
 
-import java.security.Principal;
-import java.util.Set;
+import java.security.Principal;\nimport java.util.Set;\nimport java.util.HashMap;\nimport java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +16,7 @@ public class AdminResearchController {
     private final UserAccountRepository userRepository;
     private final CaseResearchReportRepository reportRepository;
     private final CaseRecordRepository caseRecordRepository;
-    private final CaseIntakeService caseIntakeService;
+    private final CaseIntakeService caseIntakeService;\n    private final CaseDraftSuggestionService suggestionService;
 
     public AdminResearchController(UserAccountRepository userRepository,
             CaseResearchReportRepository reportRepository,
@@ -26,13 +25,19 @@ public class AdminResearchController {
         this.userRepository = userRepository;
         this.reportRepository = reportRepository;
         this.caseRecordRepository = caseRecordRepository;
-        this.caseIntakeService = caseIntakeService;
+        this.caseIntakeService = caseIntakeService;\n        this.suggestionService = suggestionService;
     }
 
     @GetMapping("/admin/research")
     public String reviewQueue(Principal principal, Model model) {
         requireAdmin(principal);
-        model.addAttribute("reports", reportRepository.findAllByStatusOrderByCollectedAtDesc("PENDING"));
+        var reports = reportRepository.findAllByStatusOrderByCollectedAtDesc("PENDING");
+        Map<Long, CaseDraftSuggestion> suggestions = new HashMap<>();
+        for (CaseResearchReport report : reports) {
+            suggestions.put(report.getId(), suggestionService.suggest(report));
+        }
+        model.addAttribute("reports", reports);
+        model.addAttribute("suggestions", suggestions);
         return "admin-research";
     }
 
