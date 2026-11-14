@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CASEZERO | Evidence Vault</title><link rel="stylesheet" th:href="@{/style.css}">
+<style>
+.vault{max-width:1100px;margin:38px auto;padding:0 22px 55px}.vault-head{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:15px;margin-top:25px}
+.vault-card{padding:14px;background:#1b1e24;border:1px solid rgba(255,255,255,.1);border-radius:12px;min-width:0}
+.vault-card img,.vault-card video{width:100%;height:145px;object-fit:cover;border-radius:8px;background:#242831}
+.vault-card h3{font-size:14px;overflow-wrap:anywhere}.vault-card p{font-size:12px}
+.vault-card a{color:#f08091;text-decoration:none;font-size:12px}
+.empty{padding:35px;text-align:center;border:1px dashed #41444d;border-radius:12px;margin-top:25px}
+</style></head>
+<body><header th:replace="~{fragments/header :: siteHeader}"></header>
+<main class="vault">
+<div class="vault-head"><div><p class="eyebrow">MEMBER WORKSPACE</p><h1>Evidence Vault</h1><p>All files attached to your investigations, kept private to your account.</p></div><a class="button" th:href="@{/investigations}">My Investigations</a></div>
+<section class="vault-grid" th:if="${!#lists.isEmpty(attachments)}">
+<article class="vault-card" th:each="attachment : ${attachments}">
+<img th:if="${#strings.startsWith(attachment.contentType,'image/')}" th:src="@{/investigations/attachments/{id}/preview(id=${attachment.id})}" alt="Evidence preview">
+<video controls preload="metadata" th:if="${#strings.startsWith(attachment.contentType,'video/')}"><source th:src="@{/investigations/attachments/{id}/preview(id=${attachment.id})}" th:type="${attachment.contentType}"></video>
+<div th:if="${attachment.contentType == 'application/pdf'}" style="height:145px;display:grid;place-items:center;background:#242831;color:#f08091;font-weight:bold;border-radius:8px">PDF DOCUMENT</div>
+<h3 th:text="${attachment.originalFilename}">Evidence file</h3>
+<p th:text="${'Investigation: ' + attachment.draft.title}">Investigation title</p>
+<p th:text="${#temporals.format(attachment.uploadedAt,'dd MMM yyyy')}">Date</p>
+<a th:href="@{/investigations/attachments/{id}/download(id=${attachment.id})}">Download</a>
+<span> · </span><a th:href="@{/investigations/{id}(id=${attachment.draft.id})}">Open investigation</a>
+</article></section>
+<section class="empty" th:if="${#lists.isEmpty(attachments)}"><h2>Your evidence vault is empty</h2><p>Attach images, PDFs or short videos to a saved investigation draft and they'll appear here.</p><a class="button" th:href="@{/#archive}">Browse Case Archive</a></section>
+</main><footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body></html>

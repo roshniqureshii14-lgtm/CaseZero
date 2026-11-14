@@ -1,20 +1,47 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CASEZERO | My Investigations</title><link rel="stylesheet" th:href="@{/style.css}">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CASEZERO | My Investigations</title><link rel="stylesheet" th:href="@{/style.css}">
 <style>
-.workspace{max-width:1050px;margin:45px auto;padding:0 22px}.workspace-head{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}.draft-list{display:grid;gap:15px;margin-top:28px}.draft-item{background:#1d2026;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:22px}.draft-meta{display:flex;gap:12px;flex-wrap:wrap;color:#a9adb6;font-size:13px}.draft-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:15px}.draft-actions form{margin:0}.draft-actions button{margin-top:0}.secondary-link{color:#f08091;text-decoration:none;font-size:14px}.status{color:#f08091;font-size:12px;letter-spacing:1px;font-weight:bold}.notice{padding:13px 16px;border:1px solid #397b5b;border-radius:8px;color:#9be0b7;margin:20px 0}.empty{padding:30px;text-align:center;border:1px dashed #41444d;border-radius:12px;margin-top:25px}
+.workspace{max-width:1100px;margin:38px auto;padding:0 22px 55px}
+.workspace-head{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.workspace-head h1{margin:5px 0;font-size:clamp(28px,4vw,40px)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:25px 0}
+.tab{padding:9px 14px;border:1px solid rgba(255,255,255,.12);border-radius:8px;text-decoration:none;color:#c7c9d0;font-size:13px}
+.tab.active,.tab:hover{background:rgba(217,67,80,.15);border-color:rgba(217,67,80,.45);color:white}
+.draft-list{display:grid;gap:14px;margin-top:20px}
+.draft-item{background:#1b1e24;border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:22px}
+.draft-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.draft-item h2{margin:10px 0;font-size:19px}
+.draft-meta{display:flex;gap:12px;flex-wrap:wrap;color:#a9adb6;font-size:12px}
+.draft-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:17px}
+.draft-actions form{margin:0}.draft-actions button{width:auto;margin:0}
+.secondary-link{color:#f08091;text-decoration:none;font-size:13px}
+.status{color:#f08091;font-size:11px;letter-spacing:1px;font-weight:bold}
+.notice{padding:13px 16px;border:1px solid #397b5b;border-radius:8px;color:#9be0b7;margin:20px 0}
+.empty{padding:38px 25px;text-align:center;border:1px dashed #41444d;border-radius:12px;margin-top:25px}
 </style></head>
 <body><header th:replace="~{fragments/header :: siteHeader}"></header>
 <main class="workspace">
-<div class="workspace-head"><div><p class="eyebrow">MEMBER WORKSPACE</p><h1>My Investigations</h1><p>Private research drafts connected to public CASEZERO case records.</p></div><a class="button" th:href="@{/}">Browse Case Archive</a></div>
+<div class="workspace-head"><div><p class="eyebrow">MEMBER WORKSPACE</p><h1>My Investigations</h1><p>Manage your private research drafts and submissions.</p></div><a class="button" th:href="@{/#archive}">Browse Case Archive</a></div>
 <div class="notice" th:if="${successMessage}" th:text="${successMessage}"></div>
+<nav class="tabs" aria-label="Investigation filters">
+<a class="tab" th:classappend="${view == 'all'} ? ' active' : ''" th:href="@{/investigations}">All activity</a>
+<a class="tab" th:classappend="${view == 'drafts'} ? ' active' : ''" th:href="@{/investigations(view='drafts')}">My Drafts</a>
+<a class="tab" th:classappend="${view == 'submitted'} ? ' active' : ''" th:href="@{/investigations(view='submitted')}">Submitted Reports</a>
+<a class="tab" th:href="@{/investigations/evidence}">Evidence Vault</a>
+</nav>
 <section class="draft-list" th:if="${!#lists.isEmpty(drafts)}">
 <article class="draft-item" th:each="draft : ${drafts}">
-<div class="status" th:text="${draft.status.replace('_', ' ')}">DRAFT</div><h2 th:text="${draft.title}">Investigation title</h2>
-<div class="draft-meta"><span th:text="${'Case: ' + draft.caseRecord.title}">Case</span><span th:text="${'Updated: ' + #temporals.format(draft.updatedAt, 'dd MMM yyyy HH:mm')}">Updated</span></div>
-<div class="draft-actions"><a class="secondary-link" th:if="${draft.status == 'DRAFT'}" th:href="@{/investigations/{id}/edit(id=${draft.id})}">Edit draft</a>
+<div class="draft-top"><span class="status" th:text="${draft.status.replace('_',' ')}">DRAFT</span><span class="draft-meta" th:text="${'Updated ' + #temporals.format(draft.updatedAt,'dd MMM yyyy HH:mm')}">Updated</span></div>
+<h2 th:text="${draft.title}">Investigation title</h2>
+<div class="draft-meta"><span th:text="${'Linked case: ' + draft.caseRecord.title}">Case</span></div>
+<div class="draft-actions">
+<a class="secondary-link" th:href="@{/investigations/{id}(id=${draft.id})}">Open investigation</a>
+<a class="secondary-link" th:if="${draft.status == 'DRAFT'}" th:href="@{/investigations/{id}/edit(id=${draft.id})}">Edit draft and evidence</a>
 <form th:if="${draft.status == 'DRAFT'}" th:action="@{/investigations/{id}/submit(id=${draft.id})}" method="post"><button type="submit">Submit for review</button></form>
-<span class="draft-meta" th:if="${draft.status == 'PENDING_REVIEW'}">Submitted — still private while awaiting review.</span></div>
-</article></section>
-<section class="empty" th:if="${#lists.isEmpty(drafts)}"><h2>No investigations yet</h2><p>Open a case from the archive and start a private investigation draft.</p></section>
-</main></body></html>
+<span class="draft-meta" th:if="${draft.status == 'PENDING_REVIEW'}">Submitted — private while awaiting review.</span>
+</div></article></section>
+<section class="empty" th:if="${#lists.isEmpty(drafts)}"><h2>No items in this view</h2><p th:text="${view == 'drafts' ? 'Your saved drafts will appear here.' : (view == 'submitted' ? 'Your submitted reports will appear here.' : 'Open a case from the archive to start a private investigation.')}">Open a case to start.</p><a class="button" th:href="@{/#archive}">Explore Case Archive</a></section>
+</main><footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body></html>

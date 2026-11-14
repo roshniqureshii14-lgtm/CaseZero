@@ -1,13 +1,17 @@
-<header th:fragment="siteHeader" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<header class="site-header" th:fragment="siteHeader" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <a class="site-brand" th:href="@{/}" aria-label="CASEZERO home">
-        <h1>CASEZERO</h1>
+        <span class="brand-mark">CZ</span>
+        <span class="brand-word">CASEZERO</span>
     </a>
-    <nav aria-label="Main navigation">
+    <nav class="site-nav" aria-label="Main navigation">
         <a th:href="@{/}">Home</a>
         <a th:href="@{/research}">Research Feed</a>
         <a sec:authorize="isAuthenticated()" th:href="@{/investigations}">My Investigations</a>
-        <a th:href="@{/signup}">Sign Up</a>
-        <a th:href="@{/login}">Sign In</a>
         <a th:href="@{/contact}">Contact Us</a>
+        <a sec:authorize="isAnonymous()" class="nav-signin" th:href="@{/login}">Sign In</a>
+        <a sec:authorize="isAnonymous()" class="nav-signup" th:href="@{/signup}">Create Account</a>
+        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="header-logout-form">
+            <button type="submit" class="header-logout">Sign Out</button>
+        </form>
     </nav>
 </header>
