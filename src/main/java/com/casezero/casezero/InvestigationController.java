@@ -28,6 +28,9 @@ public class InvestigationController {
   if(b.hasErrors()){m.addAttribute("caseRecord",c);m.addAttribute("pageTitle","Start an Investigation");return "investigation-editor";}
   InvestigationDraft d=new InvestigationDraft();d.setCaseRecord(c);d.setAuthor(currentUser(p));copy(f,d);d.setStatus("DRAFT");drafts.save(d);return "redirect:/investigations";
  }
+ @GetMapping("/{id}") public String view(@PathVariable Long id,Principal p,Model m){
+  m.addAttribute("draft",owned(id,p)); return "investigation-view";
+ }
  @GetMapping("/{id}/edit") public String editPage(@PathVariable Long id,Principal p,Model m){
   InvestigationDraft d=owned(id,p);if(!"DRAFT".equals(d.getStatus()))throw new ResponseStatusException(HttpStatus.FORBIDDEN);
   m.addAttribute("form",form(d));m.addAttribute("caseRecord",d.getCaseRecord());m.addAttribute("draftId",d.getId());m.addAttribute("pageTitle","Edit Investigation Draft");return "investigation-editor";
