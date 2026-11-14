@@ -18,12 +18,12 @@
 <header th:replace="~{fragments/header :: siteHeader}"></header>
 <main class="admin-research-page">
 <span class="hero-label">ADMINISTRATION</span><h2>Multi-source case discovery</h2>
-<p>Collect public reports from seven configured Pakistani publisher RSS feeds. Reports remain private in this review queue until an administrator checks the original source and approves them.</p>
+<p>Collect public reports from seven configured Pakistani publisher RSS feeds and, when configured, the NewsData.io news API. Reports remain private in this review queue until an administrator checks the original source and approves them.</p>
 <div class="admin-alert admin-success" th:if="${successMessage}" th:text="${successMessage}"></div>
 <div class="admin-alert admin-error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 <form method="post" th:action="@{/admin/research/collect}">
-<button type="submit">Collect reports from all publisher feeds</button></form>
-<p class="admin-note">Automatic collection also runs every six hours. A publisher failure is logged and skipped; other feeds continue.</p>
+<button type="submit">Collect reports from all publisher feeds and configured news API</button></form>
+<p class="admin-note">Automatic collection also runs every six hours. A publisher failure is logged and skipped; other feeds continue. NewsData.io is an optional API source configured with the CASEZERO_NEWSDATA_API_KEY environment variable.</p>
 <h3>Pending reports (<span th:text="${#lists.size(reports)}">0</span>)</h3>
 <p th:if="${#lists.isEmpty(reports)}" class="admin-note">No pending reports yet. Run collection or wait for the next scheduled collection.</p>
 <article class="admin-report" th:each="report : ${reports}">
