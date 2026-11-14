@@ -70,3 +70,16 @@ If the upload page says storage is not configured, check that all three environm
 - The secret key is used only by the Spring Boot server and bypasses Storage RLS. The controller therefore checks that the signed-in CASEZERO account owns the investigation and attachment before upload, preview, download or deletion.
 - The current milestone does not include an admin review/approval screen. A submitted investigation is marked pending review; it is not automatically approved or made public.
 - A 20 MB limit is deliberately used for this semester-project version so video uploads stay small and manageable.
+
+## Spring Boot multipart limits
+
+Keep the following settings in your local `src/main/resources/application.properties` file so Spring Boot accepts the supported 20 MB evidence files. Do not commit database passwords or Supabase secret keys from that file.
+
+```properties
+spring.servlet.multipart.enabled=true
+spring.servlet.multipart.max-file-size=20MB
+spring.servlet.multipart.max-request-size=25MB
+spring.servlet.multipart.file-size-threshold=2KB
+```
+
+These settings replace the older `MultipartConfigFactory` Java configuration, which is not available in this Spring Boot 4 setup.
