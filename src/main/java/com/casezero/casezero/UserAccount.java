@@ -29,6 +29,12 @@ public class UserAccount {
     @Column(name = "public_id", unique = true, length = 20)
     private String publicId;
 
+    @Column(length = 300)
+    private String bio;
+
+    @Column(length = 100)
+    private String location;
+
     public UserAccount() {
     }
 
@@ -81,5 +87,21 @@ public class UserAccount {
 
     public void setPublicId(String publicId) {
         this.publicId = publicId;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 }
