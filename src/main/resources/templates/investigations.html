@@ -12,7 +12,7 @@
 <article class="draft-item" th:each="draft : ${drafts}">
 <div class="status" th:text="${draft.status.replace('_', ' ')}">DRAFT</div><h2 th:text="${draft.title}">Investigation title</h2>
 <div class="draft-meta"><span th:text="${'Case: ' + draft.caseRecord.title}">Case</span><span th:text="${'Updated: ' + #temporals.format(draft.updatedAt, 'dd MMM yyyy HH:mm')}">Updated</span></div>
-<div class="draft-actions"><a class="secondary-link" th:if="${draft.status == 'DRAFT'}" th:href="@{/investigations/{id}/edit(id=${draft.id})}">Edit draft</a>
+<div class="draft-actions"><a class="secondary-link" th:href="@{/investigations/{id}(id=${draft.id})}">Open</a><a class="secondary-link" th:if="${draft.status == 'DRAFT'}" th:href="@{/investigations/{id}/edit(id=${draft.id})}">Edit draft</a>
 <form th:if="${draft.status == 'DRAFT'}" th:action="@{/investigations/{id}/submit(id=${draft.id})}" method="post"><button type="submit">Submit for review</button></form>
 <span class="draft-meta" th:if="${draft.status == 'PENDING_REVIEW'}">Submitted — still private while awaiting review.</span></div>
 </article></section>
