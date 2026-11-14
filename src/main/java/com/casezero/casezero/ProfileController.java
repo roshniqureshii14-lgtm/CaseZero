@@ -39,7 +39,7 @@ public class ProfileController {
         boolean ownProfile = viewer != null && viewer.getId().equals(profile.getId());
 
         model.addAttribute("profile", profile);
-        model.addAttribute("ownProfile", ownProfile);
+        model.addAttribute("ownProfile", ownProfile);\n        model.addAttribute("viewerAuthenticated", viewer != null);
         model.addAttribute("followerCount", followRepository.countByFollowed_Id(profile.getId()));
         model.addAttribute("followingCount", followRepository.countByFollower_Id(profile.getId()));
         model.addAttribute("isFollowing", viewer != null && !ownProfile
