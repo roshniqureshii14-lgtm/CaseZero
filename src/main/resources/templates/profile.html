@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CASEZERO | Member Profile</title>
+<link rel="stylesheet" th:href="@{/style.css}">
+<style>
+.profile-wrap{width:min(1050px,92%);margin:3rem auto}
+.profile-hero,.profile-panel,.profile-member-list{background:#191b20;border:1px solid #343740;border-radius:16px;padding:1.5rem;margin-bottom:1.25rem}
+.profile-hero{display:flex;gap:1.3rem;align-items:center;flex-wrap:wrap}
+.profile-avatar{width:82px;height:82px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#d94350,#76232d);font-size:2rem;font-weight:800;color:#fff}
+.profile-stats{display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:1rem}
+.profile-stats strong{display:block;font-size:1.35rem;color:#fff}
+.profile-muted{color:#a9adb6}
+.profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}
+.profile-form{display:grid;gap:.8rem}
+.profile-form label{display:grid;gap:.35rem}
+.profile-form input,.profile-form textarea{width:100%;padding:.8rem}
+.profile-form textarea{min-height:100px}
+.profile-member{display:block;padding:.65rem 0;border-bottom:1px solid #343740;text-decoration:none}
+.profile-member:last-child{border-bottom:0}
+.profile-actions{display:flex;gap:.75rem;flex-wrap:wrap}
+.profile-alert{padding:.8rem 1rem;border-radius:8px;margin:.8rem 0}
+.profile-success{background:#173321}.profile-error{background:#421e25}
+.profile-secondary{display:inline-block;padding:.65rem 1rem;border:1px solid #555;border-radius:7px;text-decoration:none;color:#eee}
+</style>
+</head>
+<body>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
+<main class="profile-wrap">
+    <div class="profile-alert profile-success" th:if="${profileSuccess}" th:text="${profileSuccess}"></div>
+    <div class="profile-alert profile-error" th:if="${profileError}" th:text="${profileError}"></div>
+
+    <section class="profile-hero">
+        <div class="profile-avatar" aria-hidden="true" th:text="${#strings.substring(profile.name,0,1).toUpperCase()}">C</div>
+        <div>
+            <span class="hero-label">CASEZERO COMMUNITY MEMBER</span>
+            <h1 th:text="${profile.name}">Member name</h1>
+            <p class="profile-muted" th:if="${profile.location != null and !#strings.isEmpty(profile.location)}" th:text="${profile.location}">Location</p>
+            <p class="profile-muted" th:if="${profile.bio != null and !#strings.isEmpty(profile.bio)}" th:text="${profile.bio}">Member bio</p>
+            <p class="profile-muted" th:if="${profile.bio == null or #strings.isEmpty(profile.bio)}">This member hasn't added a bio yet.</p>
+            <div class="profile-stats">
+                <div><strong th:text="${followerCount}">0</strong><span class="profile-muted">Followers</span></div>
+                <div><strong th:text="${followingCount}">0</strong><span class="profile-muted">Following</span></div>
+            </div>
+            <div class="profile-actions" style="margin-top:1rem" th:if="${!ownProfile}">
+                <form th:if="${!isFollowing}" method="post" th:action="@{/members/{id}/follow(id=${profile.publicId})}">
+                    <button type="submit">Follow member</button>
+                </form>
+                <form th:if="${isFollowing}" method="post" th:action="@{/members/{id}/unfollow(id=${profile.publicId})}">
+                    <button type="submit">Unfollow</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="profile-grid" th:if="${ownProfile}">
+        <div class="profile-panel">
+            <h2>Edit your profile</h2>
+            <p class="profile-muted">Your display name, short bio and location are visible to other CASEZERO members.</p>
+            <form class="profile-form" method="post" th:action="@{/profile/update}">
+                <label>Display name
+                    <input type="text" name="name" maxlength="80" required th:value="${profile.name}">
+                </label>
+                <label>About you
+                    <textarea name="bio" maxlength="300" placeholder="A short introduction..." th:text="${profile.bio}"></textarea>
+                </label>
+                <label>Location
+                    <input type="text" name="location" maxlength="100" placeholder="e.g. Lahore, Pakistan" th:value="${profile.location}">
+                </label>
+                <button type="submit">Save profile</button>
+            </form>
+        </div>
+        <div class="profile-panel">
+            <h2>Your account</h2>
+            <p class="profile-muted">Member ID</p>
+            <strong th:text="${profile.publicId}">CZ-00000000</strong>
+            <p class="profile-muted" style="margin-top:1.5rem">Your email and password are private and are not shown on your public profile.</p>
+            <a class="profile-secondary" th:href="@{/community}">Explore the community</a>
+            <form method="post" th:action="@{/logout}" style="margin-top:1rem">
+                <button type="submit">Sign out</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="profile-grid" th:unless="${ownProfile}">
+        <div class="profile-member-list">
+            <h2>Followers</h2>
+            <p class="profile-muted" th:if="${#lists.isEmpty(followers)}">No followers yet.</p>
+            <a class="profile-member" th:each="member : ${followers}" th:href="@{/members/{id}(id=${member.publicId})}" th:text="${member.name}">Member</a>
+        </div>
+        <div class="profile-member-list">
+            <h2>Following</h2>
+            <p class="profile-muted" th:if="${#lists.isEmpty(following)}">Not following anyone yet.</p>
+            <a class="profile-member" th:each="member : ${following}" th:href="@{/members/{id}(id=${member.publicId})}" th:text="${member.name}">Member</a>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body>
+</html>
