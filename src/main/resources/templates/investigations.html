@@ -43,4 +43,5 @@
 <span class="draft-meta" th:if="${draft.status == 'PENDING_REVIEW'}">Submitted — private while awaiting review.</span>
 </div></article></section>
 <section class="empty" th:if="${#lists.isEmpty(drafts)}"><h2>No items in this view</h2><p th:text="${view == 'drafts' ? 'Your saved drafts will appear here.' : (view == 'submitted' ? 'Your submitted reports will appear here.' : 'Open a case from the archive to start a private investigation.')}">Open a case to start.</p><a class="button" th:href="@{/#archive}">Explore Case Archive</a></section>
-</main></body></html>
+</main><footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body></html>
