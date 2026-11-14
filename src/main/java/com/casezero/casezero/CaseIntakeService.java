@@ -1,6 +1,9 @@
 package com.casezero.casezero;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,20 +17,29 @@ public class CaseIntakeService {
             + "\"نامعلوم لاش\" OR \"اغوا\" OR \"قتل\"";
 
     private final NewsResearchService newsResearchService;
+    private final NewsDataApiService newsDataApiService;
     private final CaseResearchReportRepository reportRepository;
 
     public CaseIntakeService(NewsResearchService newsResearchService,
+                             NewsDataApiService newsDataApiService,
                              CaseResearchReportRepository reportRepository) {
         this.newsResearchService = newsResearchService;
+        this.newsDataApiService = newsDataApiService;
         this.reportRepository = reportRepository;
     }
 
     @Transactional
     public synchronized int collectPakistanReports() {
-        List<ResearchArticle> articles =
-                newsResearchService.searchPakistanNews(PAKISTAN_CASE_SEARCH);
+        Map<String, ResearchArticle> combined = new LinkedHashMap<>();
+        for (ResearchArticle article : newsResearchService.searchPakistanNews(PAKISTAN_CASE_SEARCH)) {
+            combined.putIfAbsent(article.url(), article);
+        }
+        for (ResearchArticle article : newsDataApiService.collectPakistanReports()) {
+            combined.putIfAbsent(article.url(), article);
+        }
+
         int saved = 0;
-        for (ResearchArticle article : articles) {
+        for (ResearchArticle article : new ArrayList<>(combined.values())) {
             if (article.url() != null && article.url().startsWith("https://")
                     && !reportRepository.existsBySourceUrl(article.url())
                     && !reportRepository.existsByTitleIgnoreCase(article.title())) {
