@@ -45,13 +45,16 @@ public class NewsResearchService {
     public List<ResearchArticle> searchPakistanNews(String searchTerm) {
         List<String> terms = extractTerms(searchTerm);
         Map<String, ResearchArticle> uniqueArticles = new LinkedHashMap<>();
+        int successfulFeeds = 0;
 
         for (FeedSource source : SOURCES) {
             try {
-                for (ResearchArticle article : readFeed(source)) {
+                List<ResearchArticle> feedArticles = readFeed(source);
+                successfulFeeds++;
+                for (ResearchArticle article : feedArticles) {
                     String searchableText = (article.title() + " " + article.description())
                             .toLowerCase(Locale.ROOT);
-                    if (terms.stream().anyMatch(term -> searchableText.contains(term))) {
+                    if (terms.stream().anyMatch(searchableText::contains)) {
                         uniqueArticles.putIfAbsent(article.url(), article);
                     }
                 }
@@ -61,8 +64,11 @@ public class NewsResearchService {
             }
         }
 
-        log.info("RSS search matched {} unique article(s) across {} configured publisher feeds.",
-                uniqueArticles.size(), SOURCES.size());
+        if (successfulFeeds == 0) {
+            throw new IllegalStateException("All configured Pakistani publisher feeds were unavailable.");
+        }
+        log.info("RSS search matched {} unique article(s); {}/{} publisher feeds responded.",
+                uniqueArticles.size(), successfulFeeds, SOURCES.size());
         return new ArrayList<>(uniqueArticles.values());
     }
 
