@@ -52,10 +52,10 @@
     <header th:replace="~{fragments/header :: siteHeader}"></header>
 
     <!-- GUEST AND MEMBER DASHBOARD -->
-    <div th:class="${loggedIn} ? 'member-layout' : 'guest-layout'">
+    <div id="dashboardLayout" class="dashboard-layout" th:classappend="${loggedIn} ? ' member-layout' : ' guest-layout'">
 
         <!-- SIDEBAR -->
-        <aside class="dashboard-sidebar">
+        <aside class="dashboard-sidebar" id="dashboardSidebar">
 
             <div class="sidebar-profile">
 
@@ -101,10 +101,10 @@
             <p class="sidebar-heading">MY ACTIVITY</p>
 
             <div th:if="${loggedIn}">
-                <span class="sidebar-coming-soon">My Investigations</span>
-                <span class="sidebar-coming-soon">My Drafts</span>
-                <span class="sidebar-coming-soon">Evidence Vault</span>
-                <span class="sidebar-coming-soon">Submitted Reports</span>
+                <a th:href="@{/investigations}" class="sidebar-link">My Investigations</a>
+                <a th:href="@{/investigations(view='drafts')}" class="sidebar-link">My Drafts</a>
+                <a th:href="@{/investigations/evidence}" class="sidebar-link">Evidence Vault</a>
+                <a th:href="@{/investigations(view='submitted')}" class="sidebar-link">Submitted Reports</a>
             </div>
 
             <div th:unless="${loggedIn}" class="guest-notice">
@@ -137,6 +137,10 @@
 
         <!-- MAIN CONTENT -->
         <div class="member-content">
+            <div class="dashboard-toolbar">
+                <button type="button" id="sidebarToggle" class="sidebar-toggle" aria-controls="dashboardSidebar" aria-expanded="true">☰ Hide dashboard</button>
+                <span>CASEZERO MEMBER AREA</span>
+            </div>
 
             <main class="home-main" id="top">
 
@@ -319,32 +323,26 @@
 
                     <div class="category-grid">
 
-                        <article class="category-card">
+                        <a class="category-card" href="/?category=Missing%20Persons#archive">
                             <span class="category-number">01 / PERSONS</span>
                             <h3>Missing Persons</h3>
-                            <p>
-                                Publicly reported cases of individuals
-                                whose whereabouts remain unknown.
-                            </p>
-                        </article>
+                            <p>Browse publicly reported cases of individuals whose whereabouts remain unknown.</p>
+                            <span class="category-action">Explore this category →</span>
+                        </a>
 
-                        <article class="category-card">
+                        <a class="category-card" href="/?category=Unidentified%20Persons#archive">
                             <span class="category-number">02 / IDENTIFICATION</span>
                             <h3>Unidentified Persons</h3>
-                            <p>
-                                Cases involving unidentified individuals
-                                and publicly reported unidentified remains.
-                            </p>
-                        </article>
+                            <p>Browse cases involving unidentified individuals and publicly reported unidentified remains.</p>
+                            <span class="category-action">Explore this category →</span>
+                        </a>
 
-                        <article class="category-card">
+                        <a class="category-card" href="/?category=Unsolved%20Crimes#archive">
                             <span class="category-number">03 / CRIMINAL CASES</span>
                             <h3>Unsolved Crimes</h3>
-                            <p>
-                                Unresolved criminal cases documented
-                                through publicly available sources.
-                            </p>
-                        </article>
+                            <p>Browse unresolved criminal cases documented through public sources.</p>
+                            <span class="category-action">Explore this category →</span>
+                        </a>
 
                     </div>
 
@@ -400,6 +398,8 @@
             const cards = document.querySelectorAll(".case-card");
             const count = document.getElementById("resultCount");
             const noResults = document.getElementById("noResults");
+            const requestedCategory = new URLSearchParams(window.location.search).get("category");
+            if (requestedCategory) category.value = requestedCategory;
 
             function filterCases() {
 
@@ -455,6 +455,15 @@
 
             filterCases();
 
+            const layout = document.getElementById("dashboardLayout");
+            const toggle = document.getElementById("sidebarToggle");
+            if (layout && toggle) {
+                toggle.addEventListener("click", function () {
+                    const collapsed = layout.classList.toggle("sidebar-collapsed");
+                    toggle.setAttribute("aria-expanded", String(!collapsed));
+                    toggle.textContent = collapsed ? "☰ Show dashboard" : "☰ Hide dashboard";
+                });
+            }
         });
     </script>
 
