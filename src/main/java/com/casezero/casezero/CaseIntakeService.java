@@ -7,8 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CaseIntakeService {
     private static final String PAKISTAN_CASE_SEARCH =
-            "(\"missing person\" OR \"missing persons\" OR \"unidentified body\" OR "
-            + "\"unidentified persons\" OR \"unsolved murder\" OR \"unsolved crime\" OR \"cold case\")";
+            "\"missing person\" OR \"missing persons\" OR \"missing girl\" OR \"missing boy\" OR "
+            + "\"unidentified body\" OR \"unidentified persons\" OR \"unclaimed body\" OR "
+            + "\"unsolved murder\" OR \"unsolved crime\" OR \"cold case\" OR "
+            + "\"kidnapped\" OR \"abducted\" OR \"لاپتہ\" OR \"گمشدہ\" OR "
+            + "\"نامعلوم لاش\" OR \"اغوا\" OR \"قتل\"";
 
     private final NewsResearchService newsResearchService;
     private final CaseResearchReportRepository reportRepository;
@@ -20,7 +23,7 @@ public class CaseIntakeService {
     }
 
     @Transactional
-    public int collectPakistanReports() {
+    public synchronized int collectPakistanReports() {
         List<ResearchArticle> articles =
                 newsResearchService.searchPakistanNews(PAKISTAN_CASE_SEARCH);
         int saved = 0;
