@@ -25,4 +25,5 @@
 <span> · </span><a th:href="@{/investigations/{id}(id=${attachment.draft.id})}">Open investigation</a>
 </article></section>
 <section class="empty" th:if="${#lists.isEmpty(attachments)}"><h2>Your evidence vault is empty</h2><p>Attach images, PDFs or short videos to a saved investigation draft and they'll appear here.</p><a class="button" th:href="@{/#archive}">Browse Case Archive</a></section>
-</main></body></html>
+</main><footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body></html>
