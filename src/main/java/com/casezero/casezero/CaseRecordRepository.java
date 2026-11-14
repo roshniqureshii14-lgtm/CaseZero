@@ -9,4 +9,6 @@ public interface CaseRecordRepository
     List<CaseRecord> findAllByPublishedTrueOrderByCreatedAtDesc();
 
     boolean existsByTitleIgnoreCase(String title);
+
+    boolean existsBySourceUrl(String sourceUrl);
 }
