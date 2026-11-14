@@ -3,6 +3,7 @@ package com.casezero.casezero;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
@@ -97,7 +99,8 @@ public class NewsResearchService {
                     log.warn("GDELT rate limit reached. CASEZERO will pause new requests for 60 seconds.");
                 }
                 return useStaleCacheOrThrow(cacheKey, cleanTerm,
-                        "The GDELT service returned HTTP " + ex.getStatusCode().value() + ".");
+                        "The GDELT service returned HTTP " + ex.getStatusCode().value()
+                                + ". Response preview: " + responsePreview(ex.getResponseBodyAsString()));
             } catch (RestClientException | IllegalStateException ex) {
                 return useStaleCacheOrThrow(cacheKey, cleanTerm,
                         "The GDELT request could not be completed: " + ex.getMessage());
@@ -120,13 +123,22 @@ public class NewsResearchService {
                 .encode()
                 .toUriString();
 
-        String responseBody = restClient.get()
+        ResponseEntity<String> apiResponse = restClient.get()
                 .uri(requestUrl)
                 .retrieve()
-                .body(String.class);
+                .toEntity(String.class);
+
+        String contentType = apiResponse.getHeaders().getFirst("Content-Type");
+        String responseBody = apiResponse.getBody();
 
         if (responseBody == null || responseBody.isBlank()) {
-            throw new IllegalStateException("The news service returned an empty response.");
+            throw new IllegalStateException("The news service returned an empty response. Content-Type: "
+                    + contentType);
+        }
+
+        if (contentType != null && !contentType.toLowerCase(Locale.ROOT).contains("json")) {
+            throw new IllegalStateException("GDELT returned a non-JSON response. Content-Type: "
+                    + contentType + ". Response preview: " + responsePreview(responseBody));
         }
 
         final JsonNode response;
@@ -138,7 +150,8 @@ public class NewsResearchService {
         }
 
         if (response == null || !response.path("articles").isArray()) {
-            throw new IllegalStateException("The news service response did not contain an article list.");
+            throw new IllegalStateException("The news service response did not contain an article list. "
+                    + "Content-Type: " + contentType + ". Response preview: " + responsePreview(responseBody));
         }
 
         List<ResearchArticle> articles = new ArrayList<>();
@@ -153,6 +166,14 @@ public class NewsResearchService {
             }
         }
         return articles;
+    }
+
+    private String responsePreview(String body) {
+        if (body == null || body.isBlank()) {
+            return "(empty response body)";
+        }
+        String oneLine = body.replaceAll("\\s+", " ").trim();
+        return oneLine.length() <= 500 ? oneLine : oneLine.substring(0, 500) + "...";
     }
 
     private List<ResearchArticle> useStaleCacheOrThrow(
