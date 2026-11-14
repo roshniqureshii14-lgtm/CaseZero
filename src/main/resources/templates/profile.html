@@ -43,7 +43,7 @@
                 <div><strong th:text="${followerCount}">0</strong><span class="profile-muted">Followers</span></div>
                 <div><strong th:text="${followingCount}">0</strong><span class="profile-muted">Following</span></div>
             </div>
-            <div class="profile-actions" style="margin-top:1rem" th:if="${!ownProfile}">
+            <div class="profile-actions" style="margin-top:1rem" th:if="${!ownProfile and viewerAuthenticated}">
                 <form th:if="${!isFollowing}" method="post" th:action="@{/members/{id}/follow(id=${profile.publicId})}">
                     <button type="submit">Follow member</button>
                 </form>
