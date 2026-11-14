@@ -21,26 +21,28 @@ public class ResearchController {
 
     @GetMapping("/research")
     public String research(
-            @RequestParam(defaultValue = "missing persons") String q,
+            @RequestParam(required = false) String q,
             Model model) {
 
-        String searchTerm = q.trim();
-        if (searchTerm.isBlank()) {
-            searchTerm = "missing persons";
-        }
+        boolean searchRequested = q != null && !q.isBlank();
+        String searchTerm = searchRequested ? q.trim() : "";
 
         model.addAttribute("searchTerm", searchTerm);
+        model.addAttribute("searchPerformed", searchRequested);
         model.addAttribute("articles", List.of());
 
-        try {
-            model.addAttribute("articles", researchService.searchPakistanNews(searchTerm));
-        } catch (Exception ex) {
-            // Keep the page usable while recording the technical cause in the terminal.
-            log.warn("Research Feed request failed: {}", ex.getMessage());
-            model.addAttribute(
-                    "apiError",
-                    "The news service is not responding with usable results right now. "
-                    + "Please try again in a little while.");
+        // Do not contact GDELT just because someone opens the Research Feed.
+        // Only send an API request after the visitor submits a search.
+        if (searchRequested) {
+            try {
+                model.addAttribute("articles", researchService.searchPakistanNews(searchTerm));
+            } catch (Exception ex) {
+                log.warn("Research Feed request failed: {}", ex.getMessage());
+                model.addAttribute(
+                        "apiError",
+                        "External news search is temporarily unavailable. "
+                        + "Please try again later. Existing CASEZERO case records are still available.");
+            }
         }
 
         return "research";
