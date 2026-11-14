@@ -449,6 +449,10 @@
 
     </section>
 
+    <div th:if="${loggedIn}" style="margin:0 0 22px;">
+        <a class="button" th:href="@{/investigations/new(caseId=${caseRecord.id})}">Start an Investigation</a>
+    </div>
+
     <!-- MAIN CONTENT AND SIDEBAR -->
     <div class="case-layout">
 
