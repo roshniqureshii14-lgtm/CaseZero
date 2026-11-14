@@ -81,7 +81,7 @@ public class SupabaseStorageService {
 
     public byte[] download(String objectPath) {
         ensureConfigured();
-        HttpRequest request = HttpRequest.newBuilder(objectUri("authenticated/" + objectPath))
+        HttpRequest request = HttpRequest.newBuilder(authenticatedObjectUri(objectPath))
                 .header("Authorization", "Bearer " + secretKey)
                 .header("apikey", secretKey)
                 .GET()
@@ -120,6 +120,15 @@ public class SupabaseStorageService {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("The delete request was interrupted.", ex);
         }
+    }
+
+    private URI authenticatedObjectUri(String path) {
+        StringBuilder encoded = new StringBuilder();
+        for (String segment : path.split("/")) {
+            if (encoded.length() > 0) encoded.append('/');
+            encoded.append(encode(segment));
+        }
+        return URI.create(projectUrl + "/storage/v1/object/authenticated/" + encode(bucket) + "/" + encoded);
     }
 
     private URI objectUri(String path) {
