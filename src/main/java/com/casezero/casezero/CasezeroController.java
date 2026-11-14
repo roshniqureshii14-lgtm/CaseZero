@@ -8,13 +8,16 @@ import java.security.Principal;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -23,15 +26,18 @@ public class CasezeroController {
     private final UserAccountRepository repository;
     private final ContactMessageRepository contactRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CaseRecordRepository caseRecordRepository;
 
     public CasezeroController(
             UserAccountRepository repository,
             ContactMessageRepository contactRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            CaseRecordRepository caseRecordRepository) {
 
         this.repository = repository;
         this.contactRepository = contactRepository;
         this.passwordEncoder = passwordEncoder;
+        this.caseRecordRepository = caseRecordRepository;
     }
 
     // HOME PAGE: GUEST AND MEMBER DASHBOARD
@@ -54,7 +60,6 @@ public class CasezeroController {
                             new IllegalStateException(
                                     "Logged-in account was not found."));
 
-            // Assign an ID to accounts created before this feature.
             if (account.getPublicId() == null
                     || account.getPublicId().isBlank()) {
 
@@ -76,7 +81,6 @@ public class CasezeroController {
 
         } else {
 
-            // Keep the same guest ID throughout this browser session.
             String guestId = (String) session.getAttribute("guestId");
 
             if (guestId == null) {
@@ -95,7 +99,36 @@ public class CasezeroController {
             model.addAttribute("profileType", "GUEST");
         }
 
+        model.addAttribute(
+                "cases",
+                caseRecordRepository
+                        .findAllByPublishedTrueOrderByCreatedAtDesc()
+        );
+
         return "home";
+    }
+
+    // PUBLIC CASE DETAILS PAGE
+
+    @GetMapping("/cases/{id}")
+    public String caseDetails(
+            @PathVariable Long id,
+            Model model,
+            Principal principal) {
+
+        CaseRecord caseRecord = caseRecordRepository
+                .findById(id)
+                .filter(CaseRecord::isPublished)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Case record not found."
+                        ));
+
+        model.addAttribute("caseRecord", caseRecord);
+        model.addAttribute("loggedIn", principal != null);
+
+        return "case-details";
     }
 
     // REGISTRATION
@@ -142,14 +175,10 @@ public class CasezeroController {
         UserAccount account = new UserAccount();
 
         account.setName(form.getName().trim());
-
-        account.setEmail(
-                form.getEmail().trim().toLowerCase());
-
+        account.setEmail(form.getEmail().trim().toLowerCase());
         account.setPassword(
                 passwordEncoder.encode(form.getPassword()));
 
-        // Public ID is generated automatically before database insertion.
         repository.save(account);
 
         redirectAttributes.addFlashAttribute(
@@ -193,12 +222,9 @@ public class CasezeroController {
         ContactMessage contactMessage = new ContactMessage();
 
         contactMessage.setName(form.getName().trim());
-
         contactMessage.setEmail(
                 form.getEmail().trim().toLowerCase());
-
         contactMessage.setSubject(form.getSubject().trim());
-
         contactMessage.setMessage(form.getMessage().trim());
 
         contactRepository.save(contactMessage);

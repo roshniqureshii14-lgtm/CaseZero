@@ -23,19 +23,18 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(authorize -> authorize
 
-                // Public pages and resources
                 .requestMatchers(
                         "/",
                         "/signup",
                         "/login",
                         "/contact",
                         "/research",
+                        "/cases/**",
                         "/style.css",
                         "/images/**",
                         "/error"
                 ).permitAll()
 
-                // Other routes require authentication
                 .anyRequest().authenticated()
             )
 
