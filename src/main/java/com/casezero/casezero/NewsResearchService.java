@@ -94,6 +94,13 @@ public class NewsResearchService {
                 String link = entry.getLink() == null ? "" : entry.getLink().trim();
                 String description = entry.getDescription() == null
                         ? "" : cleanText(entry.getDescription().getValue());
+                if (description.isBlank() && entry.getContents() != null) {
+                    description = entry.getContents().stream()
+                            .map(content -> cleanText(content.getValue()))
+                            .filter(value -> !value.isBlank())
+                            .findFirst()
+                            .orElse("");
+                }
                 Date date = entry.getPublishedDate() != null
                         ? entry.getPublishedDate() : entry.getUpdatedDate();
                 String publishedAt = date == null ? "" : Instant.ofEpochMilli(date.getTime()).toString();
@@ -172,8 +179,20 @@ public class NewsResearchService {
                 .trim();
     }
 
+    /**
+     * Clean publisher text without lowercasing it. The previous implementation
+     * reused the search normalizer and unintentionally stored every title and
+     * description in lowercase in the review queue and public case archive.
+     */
     private String cleanText(String value) {
-        return normalize(value);
+        if (value == null) return "";
+        return value.replaceAll("<[^>]*>", " ")
+                .replace("&nbsp;", " ")
+                .replace("&amp;", "&")
+                .replace("&quot;", "\"")
+                .replace("&#39;", "'")
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 
     private record FeedSource(String name, String url) {}
