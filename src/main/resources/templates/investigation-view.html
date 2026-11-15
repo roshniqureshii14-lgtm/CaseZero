@@ -25,11 +25,12 @@
 <header th:replace="~{fragments/header :: siteHeader}"></header>
 <main class="detail-page">
 <div class="detail-head">
-<div><p class="eyebrow">PRIVATE MEMBER WORKSPACE</p><h1 th:text="${draft.title}">Investigation title</h1>
+<div><p class="eyebrow" th:text="${isApproved ? 'COMMUNITY INVESTIGATION' : 'PRIVATE MEMBER WORKSPACE'}">Investigation</p><h1 th:text="${draft.title}">Investigation title</h1>
 <div class="meta"><span th:text="${'Linked case: ' + draft.caseRecord.title}">Linked case</span><span th:text="${'Created: ' + #temporals.format(draft.createdAt,'dd MMM yyyy HH:mm')}">Created</span><span th:text="${'Updated: ' + #temporals.format(draft.updatedAt,'dd MMM yyyy HH:mm')}">Updated</span></div></div>
 <span class="status" th:text="${draft.status.replace('_',' ')}">DRAFT</span>
 </div>
-<div class="private-note">This investigation and its attachments are private to your account. Submitting it sends it for review; it does not publish the material.</div>
+<div class="private-note" th:if="${!isApproved}">This investigation is private while it is a draft or awaiting review. Only its author and administrators can view it.</div>
+<div class="private-note" th:if="${isApproved}">This community investigation has been approved for public viewing. Approval is a safety and policy review; it does not independently verify the truth of the claims.</div>
 <section class="panel">
 <div class="section-label">Findings and research notes</div><div class="content" th:text="${draft.findings}">Research notes</div>
 <div class="section-label">Sources and reference notes</div>
@@ -50,8 +51,8 @@
 </section>
 <div class="actions">
 <a class="secondary" th:href="@{/cases/{id}(id=${draft.caseRecord.id})}">Open linked case</a>
-<a class="secondary" th:if="${draft.status == 'DRAFT'}" th:href="@{/investigations/{id}/edit(id=${draft.id})}">Edit draft and attachments</a>
-<form th:if="${draft.status == 'DRAFT'}" th:action="@{/investigations/{id}/submit(id=${draft.id})}" method="post"><button type="submit">Submit for review</button></form>
+<a class="secondary" th:if="${isAuthor and draft.status == 'DRAFT'}" th:href="@{/investigations/{id}/edit(id=${draft.id})}">Edit draft and attachments</a>
+<form th:if="${isAuthor and draft.status == 'DRAFT'}" th:action="@{/investigations/{id}/submit(id=${draft.id})}" method="post"><button type="submit">Submit for review</button></form>
 <a class="secondary" th:href="@{/investigations}">Back to My Investigations</a>
 </div>
 </main><footer th:replace="~{fragments/footer :: siteFooter}"></footer>
