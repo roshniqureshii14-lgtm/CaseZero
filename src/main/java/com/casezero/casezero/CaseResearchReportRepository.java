@@ -7,4 +7,5 @@ public interface CaseResearchReportRepository extends JpaRepository<CaseResearch
     boolean existsBySourceUrl(String sourceUrl);
     boolean existsByTitleIgnoreCase(String title);
     List<CaseResearchReport> findAllByStatusOrderByCollectedAtDesc(String status);
+    List<CaseResearchReport> findAllByStatusInOrderByCollectedAtDesc(List<String> statuses);
 }

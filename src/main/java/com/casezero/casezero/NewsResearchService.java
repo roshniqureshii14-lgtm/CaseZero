@@ -7,9 +7,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +33,10 @@ public class NewsResearchService {
     private static final int CONNECT_TIMEOUT_MS = 8_000;
     private static final int READ_TIMEOUT_MS = 12_000;
     private static final Pattern QUOTED_TERM = Pattern.compile("\"([^\"]+)\"");
+    private static final Pattern WORD = Pattern.compile("[\\p{L}\\p{N}]+");
+    private static final Set<String> STOP_WORDS = Set.of(
+            "a", "an", "and", "are", "about", "case", "cases", "for", "from",
+            "in", "is", "of", "on", "the", "to", "with", "pakistan", "pakistani");
 
     private static final List<FeedSource> SOURCES = List.of(
             new FeedSource("Dawn", "https://www.dawn.com/feeds/pakistan/"),
@@ -43,7 +49,7 @@ public class NewsResearchService {
     );
 
     public List<ResearchArticle> searchPakistanNews(String searchTerm) {
-        List<String> terms = extractTerms(searchTerm);
+        Set<String> terms = extractTerms(searchTerm);
         Map<String, ResearchArticle> uniqueArticles = new LinkedHashMap<>();
         int successfulFeeds = 0;
 
@@ -52,14 +58,13 @@ public class NewsResearchService {
                 List<ResearchArticle> feedArticles = readFeed(source);
                 successfulFeeds++;
                 for (ResearchArticle article : feedArticles) {
-                    String searchableText = (article.title() + " " + article.description())
-                            .toLowerCase(Locale.ROOT);
+                    String searchableText = normalize(article.title() + " "
+                            + article.description() + " " + article.source());
                     if (terms.stream().anyMatch(searchableText::contains)) {
                         uniqueArticles.putIfAbsent(article.url(), article);
                     }
                 }
             } catch (Exception ex) {
-                // One unavailable publisher must not prevent collection from other feeds.
                 log.warn("Could not read {} RSS feed: {}", source.name(), ex.getMessage());
             }
         }
@@ -67,8 +72,8 @@ public class NewsResearchService {
         if (successfulFeeds == 0) {
             throw new IllegalStateException("All configured Pakistani publisher feeds were unavailable.");
         }
-        log.info("RSS search matched {} unique article(s); {}/{} publisher feeds responded.",
-                uniqueArticles.size(), successfulFeeds, SOURCES.size());
+        log.info("RSS search for [{}] matched {} unique article(s); {}/{} publisher feeds responded.",
+                searchTerm, uniqueArticles.size(), successfulFeeds, SOURCES.size());
         return new ArrayList<>(uniqueArticles.values());
     }
 
@@ -101,29 +106,74 @@ public class NewsResearchService {
         }
     }
 
-    private List<String> extractTerms(String searchTerm) {
-        List<String> terms = new ArrayList<>();
-        if (searchTerm != null) {
-            Matcher matcher = QUOTED_TERM.matcher(searchTerm);
-            while (matcher.find()) {
-                String term = matcher.group(1).trim().toLowerCase(Locale.ROOT);
-                if (!term.isBlank()) terms.add(term);
-            }
-            if (terms.isEmpty() && !searchTerm.isBlank()) {
-                terms.add(searchTerm.trim().toLowerCase(Locale.ROOT));
+    /**
+     * Treats unquoted multi-word searches as separate keywords rather than one
+     * impossible exact phrase. Quoted phrases remain supported. Publisher names
+     * are searchable too, so searches such as "Jang" can find that feed's articles.
+     */
+    private Set<String> extractTerms(String searchTerm) {
+        Set<String> terms = new LinkedHashSet<>();
+        if (searchTerm == null || searchTerm.isBlank()) {
+            terms.add("missing");
+            return expandTerms(terms);
+        }
+
+        Matcher quoted = QUOTED_TERM.matcher(searchTerm);
+        StringBuilder unquoted = new StringBuilder(searchTerm);
+        while (quoted.find()) {
+            String phrase = normalize(quoted.group(1));
+            if (!phrase.isBlank()) terms.add(phrase);
+            int start = quoted.start();
+            int end = quoted.end();
+            for (int i = start; i < end; i++) unquoted.setCharAt(i, ' ');
+        }
+
+        Matcher words = WORD.matcher(normalize(unquoted.toString()));
+        while (words.find()) {
+            String word = words.group();
+            if (!STOP_WORDS.contains(word) && word.length() > 1) {
+                terms.add(word);
             }
         }
-        if (terms.isEmpty()) terms.add("missing person");
-        return terms;
+        if (terms.isEmpty()) terms.add(normalize(searchTerm));
+        return expandTerms(terms);
     }
 
-    private String cleanText(String value) {
+    private Set<String> expandTerms(Set<String> original) {
+        Set<String> expanded = new LinkedHashSet<>(original);
+        for (String term : original) {
+            switch (term) {
+                case "missing", "missed", "لاپتہ", "گمشدہ" ->
+                        expanded.addAll(List.of("missing person", "missing persons",
+                                "missing girl", "missing boy", "لاپتہ", "گمشدہ"));
+                case "unsolved", "cold" ->
+                        expanded.addAll(List.of("unsolved crime", "unsolved murder",
+                                "cold case", "murder", "قتل"));
+                case "unidentified" ->
+                        expanded.addAll(List.of("unidentified person", "unidentified persons",
+                                "unidentified body", "نامعلوم لاش"));
+                case "kidnap", "kidnapped", "abducted" ->
+                        expanded.addAll(List.of("kidnapped", "abducted", "اغوا"));
+                case "murder", "قتل" ->
+                        expanded.addAll(List.of("murder", "قتل", "unsolved murder"));
+                default -> { }
+            }
+        }
+        return expanded;
+    }
+
+    private String normalize(String value) {
         if (value == null) return "";
-        return value.replaceAll("<[^>]*>", " ")
+        return value.toLowerCase(Locale.ROOT)
+                .replaceAll("<[^>]*>", " ")
                 .replace("&nbsp;", " ")
                 .replace("&amp;", "&")
                 .replaceAll("\\s+", " ")
                 .trim();
+    }
+
+    private String cleanText(String value) {
+        return normalize(value);
     }
 
     private record FeedSource(String name, String url) {}

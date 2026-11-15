@@ -12,7 +12,7 @@
     <section class="research-intro">
         <span class="hero-label">PUBLIC INFORMATION</span>
         <h2>Pakistan Case Discovery</h2>
-        <p>Search recent public reporting from multiple Pakistani publishers. Matching articles are research leads, not verified cases.</p>
+        <p>Search recent public reporting and previously collected leads from multiple Pakistani publishers. Results are research leads, not verified cases.</p>
         <form class="research-search" method="get" th:action="@{/research}">
             <label for="q">Search reports</label>
             <input id="q" name="q" type="search" maxlength="80"
@@ -32,11 +32,13 @@
             <span class="research-source">7 configured publishers</span>
         </div>
         <div class="research-error" role="status" th:if="${apiError}" th:text="${apiError}"></div>
+        <div class="research-error" role="status" th:if="${liveFeedWarning}" th:text="${liveFeedWarning}"></div>
+        <div class="research-error" role="status" th:if="${savedFeedWarning}" th:text="${savedFeedWarning}"></div>
         <div class="research-empty" th:if="${!searchPerformed}">
             Enter a topic above and search. Each publisher is queried independently, so one unavailable feed will not stop the others.
         </div>
         <div class="research-empty" th:if="${searchPerformed and #lists.isEmpty(articles) and apiError == null}">
-            No matching recent articles were found in the configured feeds. This does not mean no such cases exist.
+            No matching articles were found in the live feeds or saved research leads. This does not mean no such cases exist.
         </div>
         <div class="research-grid" th:if="${!#lists.isEmpty(articles)}">
             <article class="research-card" th:each="article : ${articles}">

@@ -6,12 +6,10 @@
     <nav class="site-nav" aria-label="Main navigation">
         <a th:href="@{/}">Home</a>
         <a th:href="@{/research}">Research Feed</a>
+        <a th:href="@{/community}">Community</a>
         <a sec:authorize="isAuthenticated()" th:href="@{/investigations}">My Investigations</a>
         <a th:href="@{/contact}">Contact Us</a>
         <a sec:authorize="isAnonymous()" class="nav-signin" th:href="@{/login}">Sign In</a>
         <a sec:authorize="isAnonymous()" class="nav-signup" th:href="@{/signup}">Create Account</a>
-        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="header-logout-form">
-            <button type="submit" class="header-logout">Sign Out</button>
-        </form>
     </nav>
 </header>

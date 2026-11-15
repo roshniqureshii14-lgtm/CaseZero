@@ -1,6 +1,8 @@
 package com.casezero.casezero;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -18,21 +20,30 @@ public class AdminResearchController {
     private final CaseResearchReportRepository reportRepository;
     private final CaseRecordRepository caseRecordRepository;
     private final CaseIntakeService caseIntakeService;
+    private final CaseDraftSuggestionService suggestionService;
 
     public AdminResearchController(UserAccountRepository userRepository,
             CaseResearchReportRepository reportRepository,
             CaseRecordRepository caseRecordRepository,
-            CaseIntakeService caseIntakeService) {
+            CaseIntakeService caseIntakeService,
+            CaseDraftSuggestionService suggestionService) {
         this.userRepository = userRepository;
         this.reportRepository = reportRepository;
         this.caseRecordRepository = caseRecordRepository;
         this.caseIntakeService = caseIntakeService;
+        this.suggestionService = suggestionService;
     }
 
     @GetMapping("/admin/research")
     public String reviewQueue(Principal principal, Model model) {
         requireAdmin(principal);
-        model.addAttribute("reports", reportRepository.findAllByStatusOrderByCollectedAtDesc("PENDING"));
+        var reports = reportRepository.findAllByStatusOrderByCollectedAtDesc("PENDING");
+        Map<Long, CaseDraftSuggestion> suggestions = new HashMap<>();
+        for (CaseResearchReport report : reports) {
+            suggestions.put(report.getId(), suggestionService.suggest(report));
+        }
+        model.addAttribute("reports", reports);
+        model.addAttribute("suggestions", suggestions);
         return "admin-research";
     }
 
@@ -66,7 +77,7 @@ public class AdminResearchController {
                 || cleanLocation.length() > 120 || cleanSummary.isBlank()
                 || cleanSummary.length() > 1200) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Choose a category and enter a location (max 120 characters) and summary (max 1,200 characters).");
+                    "Choose a category and verify the location (max 120 characters) and summary (max 1,200 characters).");
             return "redirect:/admin/research";
         }
         if (caseRecordRepository.existsBySourceUrl(report.getSourceUrl())) {
