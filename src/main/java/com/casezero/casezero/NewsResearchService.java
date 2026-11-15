@@ -3,9 +3,7 @@ package com.casezero.casezero;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -54,12 +52,15 @@ public class NewsResearchService {
 
     private final Executor feedExecutor;
     private final ResearchArticleMatchingStrategy matchingStrategy;
+    private final ResearchArticleFactory articleFactory;
 
     public NewsResearchService(
             @Qualifier("researchFeedExecutor") Executor feedExecutor,
-            ResearchArticleMatchingStrategy matchingStrategy) {
+            ResearchArticleMatchingStrategy matchingStrategy,
+            ResearchArticleFactory articleFactory) {
         this.feedExecutor = feedExecutor;
         this.matchingStrategy = matchingStrategy;
+        this.articleFactory = articleFactory;
     }
 
     public List<ResearchArticle> searchPakistanNews(String searchTerm) {
@@ -113,17 +114,7 @@ public class NewsResearchService {
             List<ResearchArticle> articles = new ArrayList<>();
 
             for (SyndEntry entry : feed.getEntries()) {
-                String title = cleanText(entry.getTitle());
-                String link = entry.getLink() == null ? "" : entry.getLink().trim();
-                String description = entry.getDescription() == null
-                        ? "" : cleanText(entry.getDescription().getValue());
-                Date date = entry.getPublishedDate() != null
-                        ? entry.getPublishedDate() : entry.getUpdatedDate();
-                String publishedAt = date == null ? "" : Instant.ofEpochMilli(date.getTime()).toString();
-
-                if (!title.isBlank() && link.startsWith("https://")) {
-                    articles.add(new ResearchArticle(title, link, source.name(), publishedAt, description));
-                }
+                articleFactory.from(entry, source.name()).ifPresent(articles::add);
             }
             return articles;
         }
