@@ -26,6 +26,7 @@ public class SecurityConfig {
 
                 .requestMatchers(HttpMethod.POST, "/cases/*/comments").authenticated()
                 .requestMatchers(HttpMethod.POST, "/members/*/follow", "/members/*/unfollow").authenticated()
+                .requestMatchers("/profile/**").authenticated()
                 .requestMatchers(HttpMethod.GET, "/members/**", "/community").permitAll()
 
                 .requestMatchers(
