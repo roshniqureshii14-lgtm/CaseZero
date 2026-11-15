@@ -17,7 +17,7 @@
 <body>
 <header th:replace="~{fragments/header :: siteHeader}"></header>
 <main class="admin-research-page">
-<span class="hero-label">ADMINISTRATION</span><h2>Multi-source case discovery</h2>
+<span class="hero-label">ADMINISTRATION</span><h2>Multi-source case discovery</h2><p><a href="/admin/investigations">Review community investigation submissions →</a></p>
 <p>Collect public reports from seven configured Pakistani publisher RSS feeds and, when configured, the NewsData.io news API. Reports remain private in this review queue until an administrator checks the original source and approves them.</p>
 <div class="admin-alert admin-success" th:if="${successMessage}" th:text="${successMessage}"></div>
 <div class="admin-alert admin-error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
