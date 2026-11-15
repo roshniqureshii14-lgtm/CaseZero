@@ -25,18 +25,21 @@ public class InvestigationController {
     private final CaseRecordRepository cases;
     private final InvestigationAttachmentRepository attachments;
     private final SupabaseStorageService storage;
+    private final AiInvestigationModerationService aiModerator;
 
     public InvestigationController(
             InvestigationDraftRepository drafts,
             UserAccountRepository users,
             CaseRecordRepository cases,
             InvestigationAttachmentRepository attachments,
-            SupabaseStorageService storage) {
+            SupabaseStorageService storage,
+            AiInvestigationModerationService aiModerator) {
         this.drafts = drafts;
         this.users = users;
         this.cases = cases;
         this.attachments = attachments;
         this.storage = storage;
+        this.aiModerator = aiModerator;
     }
 
     @GetMapping
@@ -193,10 +196,13 @@ public class InvestigationController {
             RedirectAttributes redirect) {
         InvestigationDraft draft = owned(id, principal);
         requireDraft(draft);
-        draft.setStatus("PENDING_REVIEW");
+        AiInvestigationModerationService.ModerationDecision decision =
+                aiModerator.moderate(draft);
+
+        draft.setStatus(decision.status());
         drafts.save(draft);
-        redirect.addFlashAttribute("successMessage",
-                "Submitted for review. Your investigation and attachments remain private while awaiting review.");
+
+        redirect.addFlashAttribute("successMessage", decision.memberMessage());
         return "redirect:/investigations";
     }
 
