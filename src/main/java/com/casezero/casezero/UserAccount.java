@@ -15,6 +15,11 @@ public class UserAccount {
     @Column(nullable = false, length = 80)
     private String name;
 
+    // Username is normalized to lowercase by the registration controller.
+    // A database migration adds a case-insensitive unique index.
+    @Column(name = "username", length = 24)
+    private String username;
+
     @Column(nullable = false, unique = true, length = 254)
     private String email;
 
@@ -65,6 +70,14 @@ public class UserAccount {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
