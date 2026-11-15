@@ -1,4 +1,3 @@
-
 package com.casezero.casezero;
 
 import jakarta.persistence.*;
@@ -35,6 +34,10 @@ public class UserAccount {
     @Column(length = 100)
     private String location;
 
+    // Key for a built-in CASEZERO avatar; never stores an uploaded image or URL.
+    @Column(name = "avatar_key", nullable = false, length = 40)
+    private String avatarKey = "case-file";
+
     public UserAccount() {
     }
 
@@ -46,6 +49,9 @@ public class UserAccount {
                     .replace("-", "")
                     .substring(0, 8)
                     .toUpperCase(Locale.ROOT);
+        }
+        if (avatarKey == null || avatarKey.isBlank()) {
+            avatarKey = "case-file";
         }
     }
 
@@ -103,5 +109,13 @@ public class UserAccount {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getAvatarKey() {
+        return avatarKey;
+    }
+
+    public void setAvatarKey(String avatarKey) {
+        this.avatarKey = avatarKey;
     }
 }
