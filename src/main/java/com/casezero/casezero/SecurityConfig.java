@@ -25,6 +25,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
 
                 .requestMatchers(HttpMethod.POST, "/cases/*/comments").authenticated()
+                .requestMatchers("/admin/**").authenticated()
                 .requestMatchers(HttpMethod.POST, "/members/*/follow", "/members/*/unfollow").authenticated()
                 .requestMatchers("/profile/**").authenticated()
                 .requestMatchers(HttpMethod.GET, "/members/**", "/community").permitAll()
