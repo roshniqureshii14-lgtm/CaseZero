@@ -41,6 +41,8 @@
 <a class="secondary-link" th:if="${draft.status == 'DRAFT'}" th:href="@{/investigations/{id}/edit(id=${draft.id})}">Edit draft and evidence</a>
 <form th:if="${draft.status == 'DRAFT'}" th:action="@{/investigations/{id}/submit(id=${draft.id})}" method="post"><button type="submit">Submit for review</button></form>
 <span class="draft-meta" th:if="${draft.status == 'PENDING_REVIEW'}">Submitted — private while awaiting review.</span>
+<span class="draft-meta" th:if="${draft.status == 'APPROVED'}">Approved — findings are visible on the linked public case page.</span>
+<span class="draft-meta" th:if="${draft.status == 'REJECTED'}">Not approved — this submission remains private.</span>
 </div></article></section>
 <section class="empty" th:if="${#lists.isEmpty(drafts)}"><h2>No items in this view</h2><p th:text="${view == 'drafts' ? 'Your saved drafts will appear here.' : (view == 'submitted' ? 'Your submitted reports will appear here.' : 'Open a case from the archive to start a private investigation.')}">Open a case to start.</p><a class="button" th:href="@{/#archive}">Explore Case Archive</a></section>
 </main><footer th:replace="~{fragments/footer :: siteFooter}"></footer>

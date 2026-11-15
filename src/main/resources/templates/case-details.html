@@ -588,10 +588,41 @@
 
             </section>
 
+            <!-- APPROVED COMMUNITY INVESTIGATIONS -->
+            <section class="content-card" id="community-investigations">
+                <div class="section-heading">
+                    <div class="section-number">04</div>
+                    <div>
+                        <h2>Approved Community Investigations</h2>
+                        <div class="section-subtitle">Member research reviewed by CASEZERO administrators</div>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${#lists.isEmpty(approvedInvestigations)}">
+                    <div class="empty-icon">i</div>
+                    <div><strong>No approved community investigations yet</strong>
+                        <p>Member submissions will appear here after administrator review.</p></div>
+                </div>
+                <article class="case-comment" th:each="investigation : ${approvedInvestigations}">
+                    <div class="comment-meta">
+                        <span class="comment-author" th:text="${investigation.title}">Investigation title</span>
+                        <span th:text="${'By ' + investigation.author.name}">Member</span>
+                        <time th:text="${#temporals.format(investigation.updatedAt,'dd MMM yyyy')}">Date</time>
+                    </div>
+                    <div class="case-summary" style="white-space:pre-wrap;margin-top:12px"
+                         th:text="${investigation.findings}">Approved findings</div>
+                    <div th:if="${investigation.sourceNotes != null and !#strings.isEmpty(investigation.sourceNotes)}">
+                        <strong class="detail-label">Sources and reference notes</strong>
+                        <p class="case-summary" style="white-space:pre-wrap"
+                           th:text="${investigation.sourceNotes}">Source notes</p>
+                    </div>
+                    <p class="comment-notice">Community-contributed research. Check the cited sources and distinguish reported facts from interpretation.</p>
+                </article>
+            </section>
+
             <!-- PUBLIC COMMENTS -->
             <section class="content-card" id="comments">
                 <div class="section-heading">
-                    <div class="section-number">04</div>
+                    <div class="section-number">05</div>
                     <div>
                         <h2>Case Comments</h2>
                         <div class="section-subtitle">Public discussion — anyone can read; members can post</div>

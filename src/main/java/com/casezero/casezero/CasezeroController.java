@@ -28,19 +28,22 @@ public class CasezeroController {
     private final PasswordEncoder passwordEncoder;
     private final CaseRecordRepository caseRecordRepository;
     private final CaseCommentRepository caseCommentRepository;
+    private final InvestigationDraftRepository investigationDraftRepository;
 
     public CasezeroController(
             UserAccountRepository repository,
             ContactMessageRepository contactRepository,
             PasswordEncoder passwordEncoder,
             CaseRecordRepository caseRecordRepository,
-            CaseCommentRepository caseCommentRepository) {
+            CaseCommentRepository caseCommentRepository,
+            InvestigationDraftRepository investigationDraftRepository) {
 
         this.repository = repository;
         this.contactRepository = contactRepository;
         this.passwordEncoder = passwordEncoder;
         this.caseRecordRepository = caseRecordRepository;
         this.caseCommentRepository = caseCommentRepository;
+        this.investigationDraftRepository = investigationDraftRepository;
     }
 
     // HOME PAGE: GUEST AND MEMBER DASHBOARD
@@ -149,6 +152,8 @@ public class CasezeroController {
         model.addAttribute("caseRecord", caseRecord);
         model.addAttribute("loggedIn", principal != null);
         model.addAttribute("comments", caseCommentRepository.findByCaseRecord_IdOrderByCreatedAtAsc(id));
+        model.addAttribute("approvedInvestigations",
+                investigationDraftRepository.findAllByCaseRecord_IdAndStatusOrderByUpdatedAtDesc(id, "APPROVED"));
         model.addAttribute("commentForm", new CaseCommentForm());
 
         return "case-details";
@@ -173,6 +178,9 @@ public class CasezeroController {
             model.addAttribute("caseRecord", caseRecord);
             model.addAttribute("loggedIn", true);
             model.addAttribute("comments", caseCommentRepository.findByCaseRecord_IdOrderByCreatedAtAsc(id));
+            model.addAttribute("approvedInvestigations",
+                    investigationDraftRepository.findAllByCaseRecord_IdAndStatusOrderByUpdatedAtDesc(id, "APPROVED"));
+            model.addAttribute("commentForm", form);
             return "case-details";
         }
 
@@ -182,7 +190,7 @@ public class CasezeroController {
         comment.setCaseRecord(caseRecord);
         comment.setAuthor(author);
         comment.setContent(form.getContent().trim());
-        caseCommentRepository.save(comment);
+        caseCommentRepository.saveAndFlush(comment);
 
         redirectAttributes.addFlashAttribute("commentSuccess", "Your comment has been posted.");
         return "redirect:/cases/" + id + "#comments";
