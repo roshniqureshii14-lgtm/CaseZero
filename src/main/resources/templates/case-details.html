@@ -569,6 +569,21 @@
                 <p class="case-summary">
                     Read the case record and its original sources first. If you have useful information, you can keep your research in a private workspace linked to this case. Private drafts and evidence are not displayed in this public discussion.
                 </p>
+                <div class="empty-state" th:if="${#lists.isEmpty(communityInvestigations)}">
+                    <div class="empty-icon">i</div>
+                    <div><strong>No approved community investigations yet</strong><p>Member submissions appear here only after administrator review.</p></div>
+                </div>
+                <div class="community-investigation-list" th:if="${!#lists.isEmpty(communityInvestigations)}">
+                    <article class="case-comment" th:each="item : ${communityInvestigations}">
+                        <div class="comment-meta">
+                            <strong class="comment-author" th:text="${item.title}">Investigation title</strong>
+                            <time th:text="${#temporals.format(item.createdAt,'dd MMM yyyy')}">Date</time>
+                        </div>
+                        <p class="comment-notice">Shared by <a th:href="@{/members/{id}(id=${item.author.publicId})}" th:text="${item.author.name}">Member</a></p>
+                        <p class="comment-body" th:text="${item.findings}">Approved community findings</p>
+                        <p class="comment-notice" th:if="${item.sourceNotes != null and !#strings.isEmpty(item.sourceNotes)}" th:text="${'Source notes: ' + item.sourceNotes}"></p>
+                    </article>
+                </div>
                 <div class="start-investigation-panel" th:if="${loggedIn}">
                     <div>
                         <div class="eyebrow">PRIVATE MEMBER WORKSPACE</div>
