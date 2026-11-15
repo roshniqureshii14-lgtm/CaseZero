@@ -190,7 +190,7 @@ public class CasezeroController {
         comment.setCaseRecord(caseRecord);
         comment.setAuthor(author);
         comment.setContent(form.getContent().trim());
-        caseCommentRepository.save(comment);
+        caseCommentRepository.saveAndFlush(comment);
 
         redirectAttributes.addFlashAttribute("commentSuccess", "Your comment has been posted.");
         return "redirect:/cases/" + id + "#comments";
