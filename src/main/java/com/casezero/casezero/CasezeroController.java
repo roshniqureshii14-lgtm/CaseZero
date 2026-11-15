@@ -78,9 +78,10 @@ public class CasezeroController {
             }
 
             model.addAttribute("profileName", account.getName());
-            model.addAttribute("username", account.getEmail());
             model.addAttribute("publicId", account.getPublicId());
             model.addAttribute("profileType", "MEMBER");
+            model.addAttribute("profileRole", "ADMIN".equalsIgnoreCase(account.getRole()) ? "Administrator" : "Registered Member");
+            model.addAttribute("profileAvatarKey", account.getAvatarKey() == null ? "case-file" : account.getAvatarKey());
 
         } else {
 
@@ -100,6 +101,8 @@ public class CasezeroController {
             model.addAttribute("profileName", "Guest Member");
             model.addAttribute("publicId", guestId);
             model.addAttribute("profileType", "GUEST");
+            model.addAttribute("profileRole", "Read-only Guest");
+            model.addAttribute("profileAvatarKey", "case-file");
         }
 
         model.addAttribute(
