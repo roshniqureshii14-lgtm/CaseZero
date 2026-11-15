@@ -4,7 +4,8 @@
 ALTER TABLE public.app_users
     ADD COLUMN IF NOT EXISTS public_id VARCHAR(20),
     ADD COLUMN IF NOT EXISTS bio VARCHAR(300),
-    ADD COLUMN IF NOT EXISTS location VARCHAR(100);
+    ADD COLUMN IF NOT EXISTS location VARCHAR(100),
+    ADD COLUMN IF NOT EXISTS avatar_key VARCHAR(40) NOT NULL DEFAULT 'case-file';
 
 -- Existing accounts need public IDs before their profile URLs can be used.
 UPDATE public.app_users
