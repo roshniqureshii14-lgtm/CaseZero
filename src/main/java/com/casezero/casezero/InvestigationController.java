@@ -107,9 +107,14 @@ public class InvestigationController {
 
     @GetMapping("/{id}")
     public String view(@PathVariable Long id, Principal principal, Model model) {
-        InvestigationDraft draft = owned(id, principal);
+        InvestigationDraft draft = visibleDraft(id, principal);
+        boolean author = isAuthor(draft, principal);
+        boolean admin = isAdmin(principal);
         model.addAttribute("draft", draft);
         model.addAttribute("attachments", attachments.findAllByDraft_IdOrderByUploadedAtDesc(id));
+        model.addAttribute("isApproved", "APPROVED".equals(draft.getStatus()));
+        model.addAttribute("isAuthor", author);
+        model.addAttribute("isAdmin", admin);
         return "investigation-view";
     }
 
@@ -180,13 +185,13 @@ public class InvestigationController {
     @GetMapping("/attachments/{attachmentId}/preview")
     public ResponseEntity<byte[]> previewAttachment(
             @PathVariable Long attachmentId, Principal principal) {
-        return attachmentResponse(ownedAttachment(attachmentId, principal), false);
+        return attachmentResponse(visibleAttachment(attachmentId, principal), false);
     }
 
     @GetMapping("/attachments/{attachmentId}/download")
     public ResponseEntity<byte[]> downloadAttachment(
             @PathVariable Long attachmentId, Principal principal) {
-        return attachmentResponse(ownedAttachment(attachmentId, principal), true);
+        return attachmentResponse(visibleAttachment(attachmentId, principal), true);
     }
 
     @PostMapping("/{id}/submit")
@@ -254,6 +259,39 @@ public class InvestigationController {
     private InvestigationAttachment ownedAttachment(Long id, Principal principal) {
         return attachments.findByIdAndDraft_Author_EmailIgnoreCase(id, principal.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    private InvestigationDraft visibleDraft(Long id, Principal principal) {
+        InvestigationDraft draft = drafts.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if ("APPROVED".equals(draft.getStatus()) || isAuthor(draft, principal) || isAdmin(principal)) {
+            return draft;
+        }
+
+        // Do not reveal that a private draft exists to unrelated visitors.
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    private InvestigationAttachment visibleAttachment(Long id, Principal principal) {
+        InvestigationAttachment attachment = attachments.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        visibleDraft(attachment.getDraft().getId(), principal);
+        return attachment;
+    }
+
+    private boolean isAuthor(InvestigationDraft draft, Principal principal) {
+        return principal != null
+                && draft.getAuthor().getEmail().equalsIgnoreCase(principal.getName());
+    }
+
+    private boolean isAdmin(Principal principal) {
+        if (principal == null) {
+            return false;
+        }
+        return users.findByEmailIgnoreCase(principal.getName())
+                .map(user -> "ADMIN".equalsIgnoreCase(user.getRole()))
+                .orElse(false);
     }
 
     private void copy(InvestigationForm form, InvestigationDraft draft) {
