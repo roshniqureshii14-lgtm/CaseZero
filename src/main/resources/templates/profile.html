@@ -8,11 +8,12 @@
 .profile-wrap{width:min(1050px,92%);margin:3rem auto}
 .profile-hero,.profile-panel,.profile-member-list{background:#191b20;border:1px solid #343740;border-radius:16px;padding:1.5rem;margin-bottom:1.25rem}
 .profile-hero{display:flex;gap:1.3rem;align-items:center;flex-wrap:wrap}
-.profile-avatar{width:82px;height:82px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#d94350,#76232d);font-size:2rem;font-weight:800;color:#fff}
+.profile-avatar{width:88px;height:88px;flex:0 0 88px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#d94350,#76232d);font-size:2.5rem;color:#fff;border:2px solid #e45b66}
 .profile-stats{display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:1rem}
 .profile-stats strong{display:block;font-size:1.35rem;color:#fff}
 .profile-muted{color:#a9adb6}
-.profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}
+.profile-role{display:inline-block;margin-top:.35rem;padding:.3rem .65rem;border:1px solid #71313a;border-radius:999px;color:#f0a0a7;font-size:.8rem}
+.profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
 .profile-form{display:grid;gap:.8rem}
 .profile-form label{display:grid;gap:.35rem}
 .profile-form input,.profile-form textarea{width:100%;padding:.8rem}
@@ -23,6 +24,14 @@
 .profile-alert{padding:.8rem 1rem;border-radius:8px;margin:.8rem 0}
 .profile-success{background:#173321}.profile-error{background:#421e25}
 .profile-secondary{display:inline-block;padding:.65rem 1rem;border:1px solid #555;border-radius:7px;text-decoration:none;color:#eee}
+.avatar-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin:.8rem 0}
+.avatar-choice{position:relative}
+.avatar-choice input{position:absolute;opacity:0;pointer-events:none}
+.avatar-choice label{display:flex;min-height:92px;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;border:1px solid #41444d;border-radius:12px;background:#22252b;cursor:pointer;text-align:center;padding:.5rem}
+.avatar-choice label span:first-child{font-size:1.8rem}
+.avatar-choice input:checked+label{border:2px solid #d94350;background:#382126;box-shadow:0 0 0 2px rgba(217,67,80,.15)}
+.avatar-choice input:focus-visible+label{outline:2px solid #fff;outline-offset:3px}
+@media(max-width:520px){.avatar-options{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -30,12 +39,15 @@
 <main class="profile-wrap">
     <div class="profile-alert profile-success" th:if="${profileSuccess}" th:text="${profileSuccess}"></div>
     <div class="profile-alert profile-error" th:if="${profileError}" th:text="${profileError}"></div>
+    <div class="profile-alert profile-success" th:if="${passwordSuccess}" th:text="${passwordSuccess}"></div>
+    <div class="profile-alert profile-error" th:if="${passwordError}" th:text="${passwordError}"></div>
 
     <section class="profile-hero">
-        <div class="profile-avatar" aria-hidden="true" th:text="${#strings.substring(profile.name,0,1).toUpperCase()}">C</div>
+        <div class="profile-avatar" aria-hidden="true" th:text="${avatarSymbol}">📁</div>
         <div>
             <span class="hero-label">CASEZERO COMMUNITY MEMBER</span>
             <h1 th:text="${profile.name}">Member name</h1>
+            <span class="profile-role" th:text="${profile.role == 'ADMIN' ? 'Administrator' : 'Registered Member'}">Registered Member</span>
             <p class="profile-muted" th:if="${profile.location != null and !#strings.isEmpty(profile.location)}" th:text="${profile.location}">Location</p>
             <p class="profile-muted" th:if="${profile.bio != null and !#strings.isEmpty(profile.bio)}" th:text="${profile.bio}">Member bio</p>
             <p class="profile-muted" th:if="${profile.bio == null or #strings.isEmpty(profile.bio)}">This member hasn't added a bio yet.</p>
@@ -51,6 +63,7 @@
                     <button type="submit">Unfollow</button>
                 </form>
             </div>
+            <p class="profile-muted" th:if="${!ownProfile and !viewerAuthenticated}"><a th:href="@{/login}">Sign in</a> to follow this member.</p>
         </div>
     </section>
 
@@ -60,7 +73,7 @@
             <p class="profile-muted">Your display name, short bio and location are visible to other CASEZERO members.</p>
             <form class="profile-form" method="post" th:action="@{/profile/update}">
                 <label>Display name
-                    <input type="text" name="name" maxlength="80" required th:value="${profile.name}">
+                    <input type="text" name="name" minlength="2" maxlength="80" required th:value="${profile.name}">
                 </label>
                 <label>About you
                     <textarea name="bio" maxlength="300" placeholder="A short introduction..." th:text="${profile.bio}"></textarea>
@@ -71,14 +84,54 @@
                 <button type="submit">Save profile</button>
             </form>
         </div>
+
         <div class="profile-panel">
-            <h2>Your account</h2>
+            <h2>Choose your avatar</h2>
+            <p class="profile-muted">Pick one of CASEZERO's built-in designs. No photo upload is needed.</p>
+            <form method="post" th:action="@{/profile/avatar}">
+                <div class="avatar-options">
+                    <div class="avatar-choice" th:each="option : ${avatarOptions}">
+                        <input type="radio" name="avatarKey" th:id="${'avatar-' + option.key}" th:value="${option.key}" th:checked="${option.key == profile.avatarKey}">
+                        <label th:for="${'avatar-' + option.key}">
+                            <span th:text="${option.symbol}">📁</span>
+                            <span th:text="${option.label}">Case File</span>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit">Save avatar</button>
+            </form>
+        </div>
+
+        <div class="profile-panel">
+            <h2>Account dashboard</h2>
             <p class="profile-muted">Member ID</p>
             <strong th:text="${profile.publicId}">CZ-00000000</strong>
-            <p class="profile-muted" style="margin-top:1.5rem">Your email and password are private and are not shown on your public profile.</p>
-            <a class="profile-secondary" th:href="@{/community}">Explore the community</a>
+            <p class="profile-muted" style="margin-top:1rem">Account type</p>
+            <strong th:text="${profile.role == 'ADMIN' ? 'Administrator' : 'Registered Member'}">Registered Member</strong>
+            <p class="profile-muted" style="margin-top:1rem">Your email and password are private and are not shown on your public profile.</p>
+            <div class="profile-actions" style="margin-top:1rem">
+                <a class="profile-secondary" th:href="@{/}">Dashboard home</a>
+                <a class="profile-secondary" th:href="@{/community}">Explore community</a>
+            </div>
             <form method="post" th:action="@{/logout}" style="margin-top:1rem">
                 <button type="submit">Sign out</button>
+            </form>
+        </div>
+
+        <div class="profile-panel">
+            <h2>Change password</h2>
+            <p class="profile-muted">Enter your current password first. Your new password must contain uppercase and lowercase letters, a number, and a special character.</p>
+            <form class="profile-form" method="post" th:action="@{/profile/password}">
+                <label>Current password
+                    <input type="password" name="currentPassword" autocomplete="current-password" required>
+                </label>
+                <label>New password
+                    <input type="password" name="newPassword" minlength="8" maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+=!]).{8,72}" title="Use uppercase, lowercase, a number and a special character." autocomplete="new-password" required>
+                </label>
+                <label>Confirm new password
+                    <input type="password" name="confirmPassword" minlength="8" maxlength="72" autocomplete="new-password" required>
+                </label>
+                <button type="submit">Update password</button>
             </form>
         </div>
     </section>
