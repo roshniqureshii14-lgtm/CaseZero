@@ -77,18 +77,7 @@
             <div class="sidebar-profile">
 
                 <a th:if="${loggedIn}" class="dashboard-avatar-link" th:href="@{/profile}" aria-label="Open your member profile">
-                    <div class="profile-avatar" aria-hidden="true">
-                        <span th:switch="${profileAvatarKey}">
-                            <span th:case="'magnifier'">🔎</span>
-                            <span th:case="'owl'">🦉</span>
-                            <span th:case="'fox'">🦊</span>
-                            <span th:case="'raven'">🐦‍⬛</span>
-                            <span th:case="'shield'">🛡️</span>
-                            <span th:case="'compass'">🧭</span>
-                            <span th:case="'archive'">🗃️</span>
-                            <span th:case="*">📁</span>
-                        </span>
-                    </div>
+                    <div class="profile-avatar" aria-hidden="true" th:text="${profileAvatarSymbol}">📁</div>
                 </a>
                 <div th:unless="${loggedIn}" class="profile-avatar" aria-hidden="true">G</div>
 
