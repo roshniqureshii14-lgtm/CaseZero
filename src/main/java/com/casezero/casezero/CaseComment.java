@@ -19,10 +19,10 @@ public class CaseComment {
     @JoinColumn(name = "user_id", nullable = false)
     private UserAccount author;
 
-    @Column(nullable = false, length = 1500)
+    @Column(name = "content", nullable = false, length = 1500)
     private String content;
 
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     public CaseComment() {
