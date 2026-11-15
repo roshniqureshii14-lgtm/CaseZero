@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASEZERO | Community Guidelines</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
+<main class="guidelines-page">
+    <section class="guidelines-hero">
+        <span class="eyebrow">CASEZERO COMMUNITY STANDARD</span>
+        <h1>Community Guidelines</h1>
+        <p>CASEZERO exists to support responsible public awareness and research about unresolved cases in Pakistan. These rules protect the dignity, privacy and safety of people connected to every case.</p>
+        <p><strong>Read-only policy page:</strong> members cannot edit or submit changes to these guidelines.</p>
+    </section>
+    <div class="guidelines-grid">
+        <section class="guideline-card"><h2>1. Use reliable public sources</h2><ul>
+            <li>Share information that is already lawfully available to the public.</li>
+            <li>Include a working source link and identify the publisher where possible.</li>
+            <li>Clearly distinguish confirmed reporting, allegations and unverified research leads.</li>
+        </ul></section>
+        <section class="guideline-card"><h2>2. Protect privacy and dignity</h2><ul>
+            <li>Never publish private addresses, phone numbers, identity documents or private account details.</li>
+            <li>Do not expose private information about victims, families, witnesses or other individuals.</li>
+            <li>Avoid graphic, exploitative or disrespectful material.</li>
+        </ul></section>
+        <section class="guideline-card"><h2>3. No accusations or harassment</h2><ul>
+            <li>Do not identify or accuse a person as responsible for a crime without reliable, attributable public reporting.</li>
+            <li>No threats, hate speech, bullying, harassment or calls for retaliation.</li>
+            <li>Do not encourage users to confront, follow or contact people connected to a case.</li>
+        </ul></section>
+        <section class="guideline-card"><h2>4. Keep research responsible</h2><ul>
+            <li>Do not trespass, hack accounts, impersonate officials or obtain information unlawfully.</li>
+            <li>Do not interfere with police work, legal proceedings or an active investigation.</li>
+            <li>Do not present speculation as fact or alter evidence and source material.</li>
+        </ul></section>
+        <section class="guideline-card"><h2>5. Contribute constructively</h2><ul>
+            <li>Keep comments relevant, respectful and focused on documented information.</li>
+            <li>Explain corrections with sources instead of arguments or personal attacks.</li>
+            <li>Respect moderation decisions and use Contact Us to report a concern.</li>
+        </ul></section>
+        <section class="guideline-card"><h2>6. Moderation and review</h2><ul>
+            <li>Submissions may be reviewed before appearing publicly.</li>
+            <li>Content that violates these rules may be hidden or removed by administrators.</li>
+            <li>Repeated or serious violations may result in account restrictions.</li>
+        </ul></section>
+    </div>
+    <div class="guidelines-note"><strong>Important:</strong> CASEZERO is an independent public-information and educational project. It is not an emergency service, police authority or substitute for legal advice. If someone is in immediate danger, contact the appropriate local emergency services.</div>
+</main>
+<footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body>
+</html>

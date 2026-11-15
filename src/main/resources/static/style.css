@@ -1505,3 +1505,39 @@ nav a {
  .footer-inner { grid-template-columns:1fr; }
  .footer-links { justify-content:flex-start; }
 }
+
+
+/* FINAL REQUIREMENTS: shared footer, guidelines page and registration hints */
+.site-footer {
+    margin-top: 76px;
+    padding: 46px clamp(20px, 6vw, 88px) 22px;
+    background: radial-gradient(circle at 8% 0%, rgba(217,67,80,.10), transparent 34%), #14161b;
+    border-top: 1px solid rgba(217,67,80,.24);
+}
+.footer-inner { align-items: start; gap: 28px 54px; }
+.footer-logo { display:inline-flex; align-items:center; gap:10px; }
+.footer-logo::before {
+    content:"CZ"; display:inline-grid; place-items:center; width:32px; height:32px;
+    border:1px solid rgba(217,67,80,.5); border-radius:8px;
+    background:rgba(217,67,80,.12); color:#ff8792; font-size:10px; letter-spacing:1px;
+}
+.footer-links { max-width:460px; row-gap:15px; }
+.footer-links a { padding:4px 0; }
+.footer-bottom { line-height:1.7; }
+.form-hint { display:block; margin:7px 0 3px; color:#9298a3; font-size:12px; line-height:1.6; }
+.guidelines-page { width:min(1000px,90%); margin:54px auto 80px; }
+.guidelines-hero {
+    padding:clamp(25px,5vw,48px);
+    border:1px solid rgba(217,67,80,.28); border-radius:16px;
+    background:radial-gradient(circle at 90% 0,rgba(217,67,80,.16),transparent 38%),linear-gradient(145deg,#20232a,#15171c);
+}
+.guidelines-hero .eyebrow { color:#ff8792; font-size:11px; font-weight:800; letter-spacing:2px; }
+.guidelines-hero h1 { margin:12px 0; font-size:clamp(32px,5vw,48px); }
+.guidelines-hero p { max-width:760px; }
+.guidelines-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:22px; }
+.guideline-card { padding:23px; border:1px solid rgba(255,255,255,.09); border-radius:12px; background:#1b1e24; }
+.guideline-card h2 { margin:0 0 10px; font-size:18px; }
+.guideline-card p,.guideline-card li { color:#b5bac4; font-size:14px; line-height:1.75; }
+.guideline-card ul { padding-left:20px; margin:10px 0 0; }
+.guidelines-note { margin-top:20px; padding:18px 20px; border-left:3px solid #d94350; background:rgba(217,67,80,.08); border-radius:0 9px 9px 0; }
+@media(max-width:680px) { .guidelines-grid { grid-template-columns:1fr; } .guidelines-page { margin:30px auto 55px; } }

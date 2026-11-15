@@ -46,6 +46,11 @@ public class CasezeroController {
         this.investigationDraftRepository = investigationDraftRepository;
     }
 
+    @GetMapping("/community-guidelines")
+    public String communityGuidelines() {
+        return "community-guidelines";
+    }
+
     // HOME PAGE: GUEST AND MEMBER DASHBOARD
 
     @GetMapping("/")
@@ -220,6 +225,14 @@ public class CasezeroController {
                     "Passwords do not match.");
         }
 
+        if (form.getUsername() != null
+                && repository.existsByUsernameIgnoreCase(form.getUsername().trim())) {
+            result.rejectValue(
+                    "username",
+                    "username.exists",
+                    "That username is already taken. Please choose another.");
+        }
+
         if (form.getEmail() != null
                 && repository.existsByEmailIgnoreCase(
                         form.getEmail().trim())) {
@@ -237,6 +250,7 @@ public class CasezeroController {
         UserAccount account = new UserAccount();
 
         account.setName(form.getName().trim());
+        account.setUsername(form.getUsername().trim().toLowerCase(Locale.ROOT));
         account.setEmail(form.getEmail().trim().toLowerCase());
         account.setPassword(
                 passwordEncoder.encode(form.getPassword()));
