@@ -17,7 +17,7 @@ public class UserAccount {
 
     // Username is normalized to lowercase by the registration controller.
     // A database migration adds a case-insensitive unique index.
-    @Column(name = "username", length = 24)
+    @Column(name = "username", nullable = false, length = 24)
     private String username;
 
     @Column(nullable = false, unique = true, length = 254)
