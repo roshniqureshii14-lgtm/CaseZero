@@ -14,6 +14,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
@@ -48,24 +52,34 @@ public class NewsResearchService {
             new FeedSource("Express Urdu", "https://www.express.pk/feed/")
     );
 
+    private final Executor feedExecutor;
+    private final ResearchArticleMatchingStrategy matchingStrategy;
+
+    public NewsResearchService(
+            @Qualifier("researchFeedExecutor") Executor feedExecutor,
+            ResearchArticleMatchingStrategy matchingStrategy) {
+        this.feedExecutor = feedExecutor;
+        this.matchingStrategy = matchingStrategy;
+    }
+
     public List<ResearchArticle> searchPakistanNews(String searchTerm) {
         Set<String> terms = extractTerms(searchTerm);
         Map<String, ResearchArticle> uniqueArticles = new LinkedHashMap<>();
         int successfulFeeds = 0;
 
-        for (FeedSource source : SOURCES) {
-            try {
-                List<ResearchArticle> feedArticles = readFeed(source);
-                successfulFeeds++;
-                for (ResearchArticle article : feedArticles) {
-                    String searchableText = normalize(article.title() + " "
-                            + article.description() + " " + article.source());
-                    if (terms.stream().anyMatch(searchableText::contains)) {
-                        uniqueArticles.putIfAbsent(article.url(), article);
-                    }
+        List<CompletableFuture<FeedResult>> feedTasks = SOURCES.stream()
+                .map(source -> CompletableFuture.supplyAsync(
+                        () -> readFeedSafely(source), feedExecutor))
+                .toList();
+
+        // Publisher requests run concurrently on a bounded worker pool.
+        for (CompletableFuture<FeedResult> task : feedTasks) {
+            FeedResult result = task.join();
+            if (result.successful()) successfulFeeds++;
+            for (ResearchArticle article : result.articles()) {
+                if (matchingStrategy.matches(article, terms)) {
+                    uniqueArticles.putIfAbsent(article.url(), article);
                 }
-            } catch (Exception ex) {
-                log.warn("Could not read {} RSS feed: {}", source.name(), ex.getMessage());
             }
         }
 
@@ -75,6 +89,15 @@ public class NewsResearchService {
         log.info("RSS search for [{}] matched {} unique article(s); {}/{} publisher feeds responded.",
                 searchTerm, uniqueArticles.size(), successfulFeeds, SOURCES.size());
         return new ArrayList<>(uniqueArticles.values());
+    }
+
+    private FeedResult readFeedSafely(FeedSource source) {
+        try {
+            return new FeedResult(readFeed(source), true);
+        } catch (Exception ex) {
+            log.warn("Could not read {} RSS feed: {}", source.name(), ex.getMessage());
+            return new FeedResult(List.of(), false);
+        }
     }
 
     private List<ResearchArticle> readFeed(FeedSource source) throws Exception {
@@ -176,5 +199,6 @@ public class NewsResearchService {
         return normalize(value);
     }
 
+    private record FeedResult(List<ResearchArticle> articles, boolean successful) {}
     private record FeedSource(String name, String url) {}
 }
