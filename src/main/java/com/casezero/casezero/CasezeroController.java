@@ -82,6 +82,7 @@ public class CasezeroController {
             model.addAttribute("profileType", "MEMBER");
             model.addAttribute("profileRole", "ADMIN".equalsIgnoreCase(account.getRole()) ? "Administrator" : "Registered Member");
             model.addAttribute("profileAvatarKey", account.getAvatarKey() == null ? "case-file" : account.getAvatarKey());
+            model.addAttribute("profileAvatarSymbol", avatarSymbol(account.getAvatarKey()));
 
         } else {
 
@@ -112,6 +113,20 @@ public class CasezeroController {
         );
 
         return "home";
+    }
+
+    private String avatarSymbol(String key) {
+        if (key == null) return "📁";
+        return switch (key) {
+            case "magnifier" -> "🔎";
+            case "owl" -> "🦉";
+            case "fox" -> "🦊";
+            case "raven" -> "🐦‍⬛";
+            case "shield" -> "🛡️";
+            case "compass" -> "🧭";
+            case "archive" -> "🗃️";
+            default -> "📁";
+        };
     }
 
     // PUBLIC CASE DETAILS PAGE
