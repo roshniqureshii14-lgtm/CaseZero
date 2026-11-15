@@ -61,9 +61,13 @@ public class AdminResearchController {
         return "redirect:/admin/research";
     }
 
+    /**
+     * All case fields are prepared from the collected article before approval.
+     * The administrator reviews the original source and makes the moderation
+     * decision; they no longer have to retype category, location or summary.
+     */
     @PostMapping("/admin/research/{id}/approve")
-    public String approveReport(@PathVariable Long id, @RequestParam String category,
-            @RequestParam String location, @RequestParam String summary,
+    public String approveReport(@PathVariable Long id,
             Principal principal, RedirectAttributes redirectAttributes) {
         requireAdmin(principal);
         CaseResearchReport report = reportRepository.findById(id)
@@ -71,15 +75,14 @@ public class AdminResearchController {
         if (!"PENDING".equals(report.getStatus())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Report already reviewed.");
         }
-        String cleanLocation = location == null ? "" : location.trim();
-        String cleanSummary = summary == null ? "" : summary.trim();
-        if (!ALLOWED_CATEGORIES.contains(category) || cleanLocation.isBlank()
-                || cleanLocation.length() > 120 || cleanSummary.isBlank()
-                || cleanSummary.length() > 1200) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Choose a category and verify the location (max 120 characters) and summary (max 1,200 characters).");
-            return "redirect:/admin/research";
+
+        CaseDraftSuggestion prepared = suggestionService.suggest(report);
+        if (!ALLOWED_CATEGORIES.contains(prepared.category())
+                || prepared.location().isBlank() || prepared.summary().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "The article could not be prepared. Keep it pending for manual source investigation.");
         }
+
         if (caseRecordRepository.existsBySourceUrl(report.getSourceUrl())) {
             report.setStatus("DUPLICATE");
             reportRepository.save(report);
@@ -87,16 +90,22 @@ public class AdminResearchController {
                     "A case with this source link already exists. This report was marked as a duplicate.");
             return "redirect:/admin/research";
         }
+
         CaseRecord record = new CaseRecord(
-                report.getTitle().length() > 150 ? report.getTitle().substring(0, 150) : report.getTitle(),
-                category, cleanLocation, cleanSummary, "Under Review",
-                report.getSourceName(), report.getSourceUrl());
+                truncate(report.getTitle(), 150),
+                prepared.category(),
+                truncate(prepared.location(), 120),
+                truncate(prepared.summary(), 1200),
+                "Under Review",
+                truncate(report.getSourceName(), 150),
+                truncate(report.getSourceUrl(), 1000));
         record.setPublished(true);
         caseRecordRepository.save(record);
+
         report.setStatus("APPROVED");
         reportRepository.save(report);
         redirectAttributes.addFlashAttribute("successMessage",
-                "The reviewed report has been added to the public case archive.");
+                "The prepared case record was approved and added to the public archive. No metadata had to be re-entered.");
         return "redirect:/admin/research";
     }
 
@@ -112,6 +121,12 @@ public class AdminResearchController {
         }
         redirectAttributes.addFlashAttribute("successMessage", "The report was rejected.");
         return "redirect:/admin/research";
+    }
+
+    private String truncate(String value, int max) {
+        if (value == null) return "";
+        String clean = value.trim();
+        return clean.length() > max ? clean.substring(0, max) : clean;
     }
 
     private void requireAdmin(Principal principal) {
