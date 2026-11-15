@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CASEZERO | Community Investigation Review</title>
+<link rel="stylesheet" th:href="@{/style.css}">
+<style>
+.review-page{width:min(1050px,92%);margin:3rem auto}
+.review-card{background:#17191f;border:1px solid #383b44;border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.review-meta,.review-note{color:#aaa;font-size:.9rem}
+.review-card h3{margin:.5rem 0}
+.review-actions{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1rem}
+.review-actions form{margin:0}
+.review-alert{padding:.8rem 1rem;border-radius:8px;margin:1rem 0;background:#173321}
+.review-empty{color:#aaa;padding:1rem 0}
+.review-card p{line-height:1.7;white-space:pre-line}
+</style>
+</head>
+<body>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
+<main class="review-page">
+<div class="hero-label">ADMINISTRATION</div>
+<h1>Community Investigation Review</h1>
+<p class="review-note">Review member-submitted findings before they appear publicly. Only approved text is displayed on the related case page. Private evidence attachments are never shown here or made public.</p>
+<div class="review-alert" th:if="${successMessage}" th:text="${successMessage}"></div>
+<p class="review-empty" th:if="${#lists.isEmpty(investigations)}">There are no community investigations waiting for review.</p>
+<article class="review-card" th:each="item : ${investigations}">
+<div class="review-meta">PENDING REVIEW · <span th:text="${item.createdAt}">Submission date</span></div>
+<h3 th:text="${item.title}">Investigation title</h3>
+<p class="review-meta">Case: <strong th:text="${item.caseRecord.title}">Case title</strong> · Submitted by <strong th:text="${item.author.name}">Member</strong></p>
+<p th:text="${item.findings}">Member findings</p>
+<div th:if="${item.sourceNotes != null and !#strings.isEmpty(item.sourceNotes)}">
+<strong>Source notes</strong><p th:text="${item.sourceNotes}">Source notes</p>
+</div>
+<p><a th:href="@{/cases/{id}(id=${item.caseRecord.id})}" target="_blank">Open related public case ↗</a></p>
+<div class="review-actions">
+<form method="post" th:action="@{/admin/investigations/{id}/approve(id=${item.id})}">
+<button type="submit">Approve and display publicly</button>
+</form>
+<form method="post" th:action="@{/admin/investigations/{id}/reject(id=${item.id})}">
+<button type="submit">Reject submission</button>
+</form>
+</div>
+</article>
+</main>
+<footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body>
+</html>
