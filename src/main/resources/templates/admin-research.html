@@ -13,6 +13,8 @@
 .admin-note{color:#bbb;font-size:.92rem}
 .admin-alert{padding:.8rem 1rem;border-radius:8px;margin:1rem 0}
 .admin-success{background:#173321}.admin-error{background:#421e25}
+.prepared-case{background:#20232a;border:1px solid #424650;border-radius:9px;padding:14px;margin:14px 0}
+.prepared-case p{line-height:1.65}
 </style></head>
 <body>
 <header th:replace="~{fragments/header :: siteHeader}"></header>
@@ -24,6 +26,7 @@
 <form method="post" th:action="@{/admin/research/collect}">
 <button type="submit">Collect reports from all publisher feeds and configured news API</button></form>
 <p class="admin-note">Automatic collection also runs every six hours. A publisher failure is logged and skipped; other feeds continue. NewsData.io is an optional API source configured with the CASEZERO_NEWSDATA_API_KEY environment variable.</p>
+<p><a th:href="@{/admin/investigations}">Review community investigations ↗</a></p>
 <h3>Pending reports (<span th:text="${#lists.size(reports)}">0</span>)</h3>
 <p th:if="${#lists.isEmpty(reports)}" class="admin-note">No pending reports yet. Run collection or wait for the next scheduled collection.</p>
 <article class="admin-report" th:each="report : ${reports}">
@@ -32,19 +35,16 @@
 <p><span th:text="${report.sourceName}">Source</span> · <span th:text="${report.publishedAt}">Date</span></p>
 <p th:if="${report.description != null}" th:text="${report.description}"></p>
 <p><a th:href="${report.sourceUrl}" target="_blank" rel="noopener noreferrer">Open original report ↗</a></p>
-<p class="admin-note">Verify the original article. CASEZERO pre-fills a suggested category, location (when detected), and summary from the article. Verify and correct every field against the original source before approval. Do not infer guilt or current missing status.</p>
+<div class="admin-note">CASEZERO has prepared the case fields from the publisher title and feed description. Review the original article and the prepared details below. If a detail is absent from the publisher feed, the system labels it "Not specified in source" instead of inventing information.</div>
+<div class="prepared-case">
+<p><strong>Suggested category:</strong> <span th:text="${suggestions[report.id].category}">Category</span></p>
+<p><strong>Detected location:</strong> <span th:text="${suggestions[report.id].location}">Location</span></p>
+<p><strong>Prepared neutral summary:</strong></p>
+<p th:text="${suggestions[report.id].summary}">Prepared summary</p>
+</div>
 <form method="post" th:action="@{/admin/research/{id}/approve(id=${report.id})}">
-<label>Case category<select name="category" required>
-<option value="">Select a category</option>
-<option value="Missing Persons" th:selected="${suggestions[report.id].category == 'Missing Persons'}">Missing Persons</option>
-<option value="Unidentified Persons" th:selected="${suggestions[report.id].category == 'Unidentified Persons'}">Unidentified Persons</option>
-<option value="Unsolved Crimes" th:selected="${suggestions[report.id].category == 'Unsolved Crimes'}">Unsolved Crimes</option>
-<option value="Other Unresolved Cases" th:selected="${suggestions[report.id].category == 'Other Unresolved Cases'}">Other Unresolved Cases</option></select></label>
-<label>Suggested location<input name="location" maxlength="120" required
-th:value="${suggestions[report.id].location}" placeholder="Not detected — verify the article and enter the location"></label>
-<label>Suggested neutral summary<textarea name="summary" maxlength="1200" required
-th:text="${suggestions[report.id].summary}"></textarea></label>
-<button type="submit">Approve and publish case</button>
+<button type="submit">Approve prepared case and publish</button>
+</form>
 </form>
 <form method="post" th:action="@{/admin/research/{id}/reject(id=${report.id})}">
 <button type="submit">Reject report</button></form>
