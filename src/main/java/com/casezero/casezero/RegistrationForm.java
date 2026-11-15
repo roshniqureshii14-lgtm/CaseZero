@@ -13,6 +13,11 @@ public class RegistrationForm {
           message = "Name must be 2–80 characters.")
     private String name;
 
+    @NotBlank(message = "Username is required.")
+    @Size(min = 3, max = 24, message = "Username must be 3–24 characters.")
+    @Pattern(regexp = "^[A-Za-z0-9._-]+$", message = "Username may contain only letters, numbers, dots, underscores, and hyphens.")
+    private String username;
+
     @NotBlank(message = "Email is required.")
     @Email(message = "Enter a valid email address.")
     @Size(max = 254, message = "Email is too long.")
@@ -36,6 +41,14 @@ public class RegistrationForm {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {

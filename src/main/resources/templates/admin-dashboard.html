@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASEZERO | Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <style>
+        .admin-dashboard{width:min(1120px,92%);margin:3rem auto}
+        .admin-eyebrow{color:#e35b68;letter-spacing:.18em;font-size:.78rem;font-weight:700}
+        .admin-intro{max-width:720px}
+        .admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.2rem;margin:2rem 0}
+        .admin-card{display:flex;flex-direction:column;gap:.8rem;padding:1.5rem;border:1px solid #39343a;border-radius:14px;background:linear-gradient(145deg,#202126,#17181d);min-height:220px}
+        .admin-count{font-size:2.4rem;font-weight:800;color:#f06b76}
+        .admin-card p{margin:0}
+        .admin-card a{align-self:flex-start;margin-top:auto;color:#ff8992;font-weight:700;text-decoration:none}
+        .admin-card a:hover{text-decoration:underline}
+        .admin-quick-links{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.5rem}
+        .admin-quick-links a{padding:.7rem 1rem;border:1px solid #514047;border-radius:8px;text-decoration:none}
+        .nav-logout{display:inline-flex;margin:0}
+        .nav-logout button{margin:0;padding:.55rem .9rem}
+    </style>
+</head>
+<body>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
+<main class="admin-dashboard">
+    <span class="admin-eyebrow">CASEZERO CONTROL CENTRE</span>
+    <h1>Administrator Dashboard</h1>
+    <p class="admin-intro">Welcome to the private administration area. Review incoming public-source reports, moderate community investigations, and manage the CASEZERO archive from here.</p>
+
+    <section class="admin-grid" aria-label="Review queues">
+        <article class="admin-card">
+            <span class="admin-eyebrow">RESEARCH INTAKE</span>
+            <div class="admin-count" th:text="${pendingResearchCount}">0</div>
+            <h2>Pending Research Reports</h2>
+            <p>Check source articles and verify suggested case details before publication.</p>
+            <a th:href="@{/admin/research}">Open research review →</a>
+        </article>
+
+        <article class="admin-card">
+            <span class="admin-eyebrow">COMMUNITY MODERATION</span>
+            <div class="admin-count" th:text="${pendingInvestigationCount}">0</div>
+            <h2>Community Investigations</h2>
+            <p>Review member submissions before any investigation becomes publicly visible.</p>
+            <a th:href="@{/admin/investigations}">Open investigation review →</a>
+        </article>
+    </section>
+
+    <section>
+        <h2>Quick access</h2>
+        <div class="admin-quick-links">
+            <a th:href="@{/admin/research}">Research report review</a>
+            <a th:href="@{/admin/investigations}">Community investigation review</a>
+            <a th:href="@{/}">View public CASEZERO website</a>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body>
+</html>

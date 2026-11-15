@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CASEZERO | Community</title>
+<link rel="stylesheet" th:href="@{/style.css}">
+<style>
+.community-wrap{width:min(1100px,92%);margin:3rem auto}
+.community-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-top:1.5rem}
+.community-card{background:#191b20;border:1px solid #343740;border-radius:14px;padding:1.25rem}
+.community-avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#8e2935;color:white;font-weight:800;font-size:1.2rem}
+.community-card h3{margin:.8rem 0 .3rem}
+.community-muted{color:#a9adb6}
+</style>
+</head>
+<body>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
+<main class="community-wrap">
+    <span class="hero-label">CASEZERO NETWORK</span>
+    <h1>Explore the community</h1>
+    <p class="community-muted">Find other members, learn about their interests and follow their public profiles.</p>
+    <div class="community-grid" th:if="${!#lists.isEmpty(members)}">
+        <article class="community-card" th:each="member : ${members}">
+            <div class="community-avatar" th:text="${#strings.substring(member.name,0,1).toUpperCase()}">C</div>
+            <h3 th:text="${member.name}">Member name</h3>
+            <p class="community-muted" th:if="${member.location != null and !#strings.isEmpty(member.location)}" th:text="${member.location}">Location</p>
+            <p class="community-muted" th:if="${member.bio != null and !#strings.isEmpty(member.bio)}" th:text="${member.bio}">Bio</p>
+            <p class="community-muted" th:if="${member.bio == null or #strings.isEmpty(member.bio)}">CASEZERO community member</p>
+            <a class="button" th:href="@{/members/{id}(id=${member.publicId})}">View profile</a>
+        </article>
+    </div>
+    <p class="community-muted" th:if="${#lists.isEmpty(members)}">There are no other members to show yet. Invite someone to join CASEZERO.</p>
+</main>
+<footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body>
+</html>

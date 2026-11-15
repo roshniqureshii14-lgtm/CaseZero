@@ -1,4 +1,3 @@
-
 package com.casezero.casezero;
 
 import java.util.List;
@@ -8,5 +7,8 @@ public interface CaseRecordRepository
         extends JpaRepository<CaseRecord, Long> {
 
     List<CaseRecord> findAllByPublishedTrueOrderByCreatedAtDesc();
-}
 
+    boolean existsByTitleIgnoreCase(String title);
+
+    boolean existsBySourceUrl(String sourceUrl);
+}

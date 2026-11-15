@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CASEZERO | Investigation</title><link rel="stylesheet" th:href="@{/style.css}">
+<style>
+.detail-page{max-width:1050px;margin:38px auto;padding:0 22px 55px}
+.detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.detail-head h1{font-size:clamp(28px,4vw,40px);margin:5px 0}
+.meta{display:flex;gap:12px;flex-wrap:wrap;color:#a9adb6;font-size:13px;margin:12px 0 20px}
+.status{display:inline-block;padding:6px 10px;border-radius:20px;color:#f3b4bc;background:rgba(217,67,80,.13);font-size:11px;font-weight:bold;letter-spacing:1px}
+.panel{background:#1b1e24;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:26px;margin:18px 0}
+.section-label{color:#f08091;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;margin:20px 0 8px}
+.content{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;color:#e0e1e5}
+.private-note{border-left:3px solid #c8324b;padding:12px 15px;background:rgba(200,50,75,.08);color:#d5d6dc;font-size:13px}
+.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:20px}
+.actions form{margin:0}.actions button{width:auto;margin:0}
+.secondary{color:#f08091;text-decoration:none;font-size:13px}
+.attachment-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.attachment-card{padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#14171c;min-width:0}
+.attachment-card img,.attachment-card video{width:100%;height:130px;object-fit:cover;border-radius:7px;background:#242831}
+.attachment-card strong{display:block;margin:9px 0;font-size:12px;overflow-wrap:anywhere}
+</style></head>
+<body>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
+<main class="detail-page">
+<div class="detail-head">
+<div><p class="eyebrow">PRIVATE MEMBER WORKSPACE</p><h1 th:text="${draft.title}">Investigation title</h1>
+<div class="meta"><span th:text="${'Linked case: ' + draft.caseRecord.title}">Linked case</span><span th:text="${'Created: ' + #temporals.format(draft.createdAt,'dd MMM yyyy HH:mm')}">Created</span><span th:text="${'Updated: ' + #temporals.format(draft.updatedAt,'dd MMM yyyy HH:mm')}">Updated</span></div></div>
+<span class="status" th:text="${draft.status.replace('_',' ')}">DRAFT</span>
+</div>
+<div class="private-note">This investigation and its attachments are private to your account. Submitting it sends it for review; it does not publish the material.</div>
+<section class="panel">
+<div class="section-label">Findings and research notes</div><div class="content" th:text="${draft.findings}">Research notes</div>
+<div class="section-label">Sources and reference notes</div>
+<div class="content" th:if="${draft.sourceNotes != null and !#strings.isEmpty(draft.sourceNotes)}" th:text="${draft.sourceNotes}">Sources</div>
+<p class="content" th:if="${draft.sourceNotes == null or #strings.isEmpty(draft.sourceNotes)}">No source notes have been added yet.</p>
+</section>
+<section class="panel">
+<div class="section-label">Evidence attachments</div>
+<div class="attachment-grid" th:if="${!#lists.isEmpty(attachments)}">
+<article class="attachment-card" th:each="attachment : ${attachments}">
+<img th:if="${#strings.startsWith(attachment.contentType,'image/')}" th:src="@{/investigations/attachments/{id}/preview(id=${attachment.id})}" alt="Evidence image">
+<video controls preload="metadata" th:if="${#strings.startsWith(attachment.contentType,'video/')}"><source th:src="@{/investigations/attachments/{id}/preview(id=${attachment.id})}" th:type="${attachment.contentType}"></video>
+<div th:if="${attachment.contentType == 'application/pdf'}" style="height:130px;display:grid;place-items:center;color:#f08091;font-weight:bold;background:#242831;border-radius:7px">PDF DOCUMENT</div>
+<strong th:text="${attachment.originalFilename}">Evidence file</strong>
+<a class="secondary" th:href="@{/investigations/attachments/{id}/download(id=${attachment.id})}">Download file</a>
+</article></div>
+<p th:if="${#lists.isEmpty(attachments)}">No evidence files have been attached.</p>
+</section>
+<div class="actions">
+<a class="secondary" th:href="@{/cases/{id}(id=${draft.caseRecord.id})}">Open linked case</a>
+<a class="secondary" th:if="${draft.status == 'DRAFT'}" th:href="@{/investigations/{id}/edit(id=${draft.id})}">Edit draft and attachments</a>
+<form th:if="${draft.status == 'DRAFT'}" th:action="@{/investigations/{id}/submit(id=${draft.id})}" method="post"><button type="submit">Submit for review</button></form>
+<a class="secondary" th:href="@{/investigations}">Back to My Investigations</a>
+</div>
+</main><footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body></html>

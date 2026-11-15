@@ -23,6 +23,15 @@
             <p th:if="${#fields.hasErrors('name')}"
                th:errors="*{name}"></p>
 
+            <label for="username">Username</label>
+            <input type="text" id="username" th:field="*{username}"
+                   minlength="3" maxlength="24"
+                   pattern="[A-Za-z0-9._-]+"
+                   autocomplete="username" required>
+            <small class="form-hint">3–24 characters. Use letters, numbers, dots, underscores, or hyphens. Usernames must be unique.</small>
+            <p th:if="${#fields.hasErrors('username')}"
+               th:errors="*{username}"></p>
+
             <label for="email">Email Address</label>
             <input type="email" id="email" th:field="*{email}"
                    maxlength="254" autocomplete="email" required>
@@ -51,8 +60,6 @@
     </section>
 </main>
 
-<footer>
-    CASEZERO — Supporting awareness through public information.
-</footer>
+<footer th:replace="~{fragments/footer :: siteFooter}"></footer>
 </body>
 </html>

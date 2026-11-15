@@ -27,17 +27,28 @@ public class CasezeroController {
     private final ContactMessageRepository contactRepository;
     private final PasswordEncoder passwordEncoder;
     private final CaseRecordRepository caseRecordRepository;
+    private final CaseCommentRepository caseCommentRepository;
+    private final InvestigationDraftRepository investigationDraftRepository;
 
     public CasezeroController(
             UserAccountRepository repository,
             ContactMessageRepository contactRepository,
             PasswordEncoder passwordEncoder,
-            CaseRecordRepository caseRecordRepository) {
+            CaseRecordRepository caseRecordRepository,
+            CaseCommentRepository caseCommentRepository,
+            InvestigationDraftRepository investigationDraftRepository) {
 
         this.repository = repository;
         this.contactRepository = contactRepository;
         this.passwordEncoder = passwordEncoder;
         this.caseRecordRepository = caseRecordRepository;
+        this.caseCommentRepository = caseCommentRepository;
+        this.investigationDraftRepository = investigationDraftRepository;
+    }
+
+    @GetMapping("/community-guidelines")
+    public String communityGuidelines() {
+        return "community-guidelines";
     }
 
     // HOME PAGE: GUEST AND MEMBER DASHBOARD
@@ -75,9 +86,11 @@ public class CasezeroController {
             }
 
             model.addAttribute("profileName", account.getName());
-            model.addAttribute("username", account.getEmail());
             model.addAttribute("publicId", account.getPublicId());
             model.addAttribute("profileType", "MEMBER");
+            model.addAttribute("profileRole", "ADMIN".equalsIgnoreCase(account.getRole()) ? "Administrator" : "Registered Member");
+            model.addAttribute("profileAvatarKey", account.getAvatarKey() == null ? "case-file" : account.getAvatarKey());
+            model.addAttribute("profileAvatarSymbol", avatarSymbol(account.getAvatarKey()));
 
         } else {
 
@@ -97,6 +110,8 @@ public class CasezeroController {
             model.addAttribute("profileName", "Guest Member");
             model.addAttribute("publicId", guestId);
             model.addAttribute("profileType", "GUEST");
+            model.addAttribute("profileRole", "Read-only Guest");
+            model.addAttribute("profileAvatarKey", "case-file");
         }
 
         model.addAttribute(
@@ -106,6 +121,20 @@ public class CasezeroController {
         );
 
         return "home";
+    }
+
+    private String avatarSymbol(String key) {
+        if (key == null) return "📁";
+        return switch (key) {
+            case "magnifier" -> "🔎";
+            case "owl" -> "🦉";
+            case "fox" -> "🦊";
+            case "raven" -> "🐦‍⬛";
+            case "shield" -> "🛡️";
+            case "compass" -> "🧭";
+            case "archive" -> "🗃️";
+            default -> "📁";
+        };
     }
 
     // PUBLIC CASE DETAILS PAGE
@@ -127,8 +156,46 @@ public class CasezeroController {
 
         model.addAttribute("caseRecord", caseRecord);
         model.addAttribute("loggedIn", principal != null);
+        model.addAttribute("comments", caseCommentRepository.findByCaseRecord_IdOrderByCreatedAtAsc(id));
+        model.addAttribute("communityInvestigations", investigationDraftRepository
+                .findAllByCaseRecord_IdAndStatusOrderByCreatedAtDesc(id, "APPROVED"));
+        model.addAttribute("commentForm", new CaseCommentForm());
 
         return "case-details";
+    }
+
+    // PUBLIC COMMENTS: READ ACCESS IS PUBLIC; POSTING REQUIRES SIGN-IN
+    @PostMapping("/cases/{id}/comments")
+    public String postCaseComment(
+            @PathVariable Long id,
+            @Valid @ModelAttribute("commentForm") CaseCommentForm form,
+            BindingResult result,
+            Principal principal,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        CaseRecord caseRecord = caseRecordRepository.findById(id)
+                .filter(CaseRecord::isPublished)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Case record not found."));
+
+        if (result.hasErrors()) {
+            model.addAttribute("caseRecord", caseRecord);
+            model.addAttribute("loggedIn", true);
+            model.addAttribute("comments", caseCommentRepository.findByCaseRecord_IdOrderByCreatedAtAsc(id));
+            return "case-details";
+        }
+
+        UserAccount author = repository.findByEmailIgnoreCase(principal.getName())
+                .orElseThrow(() -> new IllegalStateException("Logged-in account was not found."));
+        CaseComment comment = new CaseComment();
+        comment.setCaseRecord(caseRecord);
+        comment.setAuthor(author);
+        comment.setContent(form.getContent().trim());
+        caseCommentRepository.save(comment);
+
+        redirectAttributes.addFlashAttribute("commentSuccess", "Your comment has been posted.");
+        return "redirect:/cases/" + id + "#comments";
     }
 
     // REGISTRATION
@@ -158,6 +225,14 @@ public class CasezeroController {
                     "Passwords do not match.");
         }
 
+        if (form.getUsername() != null
+                && repository.existsByUsernameIgnoreCase(form.getUsername().trim())) {
+            result.rejectValue(
+                    "username",
+                    "username.exists",
+                    "That username is already taken. Please choose another.");
+        }
+
         if (form.getEmail() != null
                 && repository.existsByEmailIgnoreCase(
                         form.getEmail().trim())) {
@@ -175,6 +250,7 @@ public class CasezeroController {
         UserAccount account = new UserAccount();
 
         account.setName(form.getName().trim());
+        account.setUsername(form.getUsername().trim().toLowerCase(Locale.ROOT));
         account.setEmail(form.getEmail().trim().toLowerCase());
         account.setPassword(
                 passwordEncoder.encode(form.getPassword()));
