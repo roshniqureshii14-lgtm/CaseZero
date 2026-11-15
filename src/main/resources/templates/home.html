@@ -43,6 +43,23 @@
         .case-card[hidden] {
             display: none !important;
         }
+
+        .dashboard-avatar-link {
+            display: inline-flex;
+            border-radius: 50%;
+            text-decoration: none;
+            outline-offset: 4px;
+        }
+
+        .dashboard-avatar-link .profile-avatar {
+            cursor: pointer;
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+
+        .dashboard-avatar-link:hover .profile-avatar {
+            transform: translateY(-2px);
+            box-shadow: 0 0 0 3px rgba(217, 67, 80, .35);
+        }
     </style>
 </head>
 
@@ -59,11 +76,21 @@
 
             <div class="sidebar-profile">
 
-                <div class="profile-avatar">
-                    <span th:if="${loggedIn}"
-                          th:text="${#strings.substring(profileName, 0, 1)}">M</span>
-                    <span th:unless="${loggedIn}">G</span>
-                </div>
+                <a th:if="${loggedIn}" class="dashboard-avatar-link" th:href="@{/profile}" aria-label="Open your member profile">
+                    <div class="profile-avatar" aria-hidden="true">
+                        <span th:switch="${profileAvatarKey}">
+                            <span th:case="'magnifier'">🔎</span>
+                            <span th:case="'owl'">🦉</span>
+                            <span th:case="'fox'">🦊</span>
+                            <span th:case="'raven'">🐦‍⬛</span>
+                            <span th:case="'shield'">🛡️</span>
+                            <span th:case="'compass'">🧭</span>
+                            <span th:case="'archive'">🗃️</span>
+                            <span th:case="*">📁</span>
+                        </span>
+                    </div>
+                </a>
+                <div th:unless="${loggedIn}" class="profile-avatar" aria-hidden="true">G</div>
 
                 <div class="profile-details">
 
@@ -80,8 +107,7 @@
                         GUEST-XXXXXX
                     </span>
 
-                    <span class="profile-status"
-                          th:text="${loggedIn} ? 'Registered Member' : 'Read-only Guest'">
+                    <span class="profile-status" th:text="${profileRole}">
                         Read-only Guest
                     </span>
 
