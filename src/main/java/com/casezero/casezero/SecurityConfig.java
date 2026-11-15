@@ -22,6 +22,11 @@ public class SecurityConfig {
 
         http
             .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(HttpMethod.GET, "/investigations/evidence", "/investigations/new").authenticated()
+                .requestMatchers(HttpMethod.GET, "/investigations/*").permitAll()
+                .requestMatchers(HttpMethod.GET,
+                        "/investigations/attachments/*/preview",
+                        "/investigations/attachments/*/download").permitAll()
                 .requestMatchers(HttpMethod.POST, "/cases/*/comments").authenticated()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/members/*/follow", "/members/*/unfollow").authenticated()
