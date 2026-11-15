@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CASEZERO | Community Investigation Review</title>
+<link rel="stylesheet" th:href="@{/style.css}">
+<style>
+.review-page{width:min(1100px,92%);margin:42px auto 65px}
+.review-links{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}
+.review-links a{color:#f08091;text-decoration:none}
+.review-card{background:#1b1e24;border:1px solid rgba(255,255,255,.12);border-radius:13px;padding:24px;margin:18px 0}
+.review-meta{display:flex;gap:14px;flex-wrap:wrap;color:#aeb2bb;font-size:12px;margin:10px 0}
+.review-content{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;color:#e2e3e7}
+.review-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.review-actions form{margin:0}
+.review-actions button{width:auto;margin:0}
+.review-note{color:#aeb2bb;font-size:13px;line-height:1.65}
+.review-alert{padding:12px 15px;border-radius:8px;margin:16px 0}
+.review-success{border:1px solid #397b5b;color:#9be0b7}
+.review-empty{padding:30px;border:1px dashed #454952;border-radius:12px;text-align:center}
+</style>
+</head>
+<body>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
+<main class="review-page">
+<p class="eyebrow">ADMINISTRATION</p>
+<h1>Community Investigation Reviews</h1>
+<p>Review member-submitted findings before they appear on a public case page. Private drafts and uploaded evidence remain private.</p>
+<nav class="review-links">
+<a th:href="@{/admin/research}">Research Feed Review</a>
+<a th:href="@{/}">Return to CASEZERO</a>
+</nav>
+<div class="review-alert review-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+<h2>Pending submissions (<span th:text="${#lists.size(investigations)}">0</span>)</h2>
+<section th:if="${!#lists.isEmpty(investigations)}">
+<article class="review-card" th:each="item : ${investigations}">
+<strong class="eyebrow">PENDING REVIEW</strong>
+<h2 th:text="${item.title}">Investigation title</h2>
+<div class="review-meta">
+<span th:text="${'Case: ' + item.caseRecord.title}">Linked case</span>
+<span th:text="${'Submitted by: ' + item.author.name}">Member</span>
+<span th:text="${'Updated: ' + #temporals.format(item.updatedAt,'dd MMM yyyy HH:mm')}">Date</span>
+</div>
+<h3>Findings</h3>
+<div class="review-content" th:text="${item.findings}">Findings</div>
+<div th:if="${item.sourceNotes != null and !#strings.isEmpty(item.sourceNotes)}">
+<h3>Sources and reference notes</h3>
+<div class="review-content" th:text="${item.sourceNotes}">Source notes</div>
+</div>
+<p class="review-note">Approval publishes these written findings on the linked case page. Uploaded evidence files remain private and are not published.</p>
+<div class="review-actions">
+<form method="post" th:action="@{/admin/investigations/{id}/approve(id=${item.id})}">
+<button type="submit">Approve and publish</button>
+</form>
+<form method="post" th:action="@{/admin/investigations/{id}/reject(id=${item.id})}">
+<button type="submit">Reject submission</button>
+</form>
+</div>
+</article>
+</section>
+<div class="review-empty" th:if="${#lists.isEmpty(investigations)}">
+<h3>No pending community investigations</h3>
+<p>New member submissions will appear here for review.</p>
+</div>
+</main>
+<footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+</body>
+</html>
