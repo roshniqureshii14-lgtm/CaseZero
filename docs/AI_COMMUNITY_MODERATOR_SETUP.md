@@ -21,7 +21,7 @@ Set the environment variable before starting CASEZERO.
 
 ```powershell
 $env:CASEZERO_OPENAI_API_KEY="paste-your-own-key-here"
-.`mvnw.cmd spring-boot:run
+./mvnw.cmd spring-boot:run
 ```
 
 Replace the placeholder with your key locally. Do not include quotation marks inside the key.
