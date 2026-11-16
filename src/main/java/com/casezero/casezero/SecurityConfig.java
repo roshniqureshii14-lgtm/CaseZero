@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .successHandler((request, response, authentication) -> {
                     boolean isAdmin = authentication.getAuthorities().stream()
                             .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
-                    response.sendRedirect(isAdmin ? "/admin" : "/");
+                    response.sendRedirect(isAdmin ? "/admin?loginSuccess" : "/?loginSuccess");
                 })
                 .failureUrl("/login?error")
                 .permitAll()
