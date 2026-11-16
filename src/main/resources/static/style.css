@@ -1541,3 +1541,60 @@ nav a {
 .guideline-card ul { padding-left:20px; margin:10px 0 0; }
 .guidelines-note { margin-top:20px; padding:18px 20px; border-left:3px solid #d94350; background:rgba(217,67,80,.08); border-radius:0 9px 9px 0; }
 @media(max-width:680px) { .guidelines-grid { grid-template-columns:1fr; } .guidelines-page { margin:30px auto 55px; } }
+
+
+/* CASEZERO toast notifications */
+.cz-toast-stack {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    z-index: 10000;
+    display: grid;
+    gap: 12px;
+    width: min(390px, calc(100vw - 32px));
+    pointer-events: none;
+}
+.cz-toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 17px;
+    border-radius: 10px;
+    background: #191d22;
+    color: #f5f5f6;
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 14px 38px rgba(0,0,0,.38);
+    font-size: 13px;
+    line-height: 1.55;
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(-12px);
+    animation: cz-toast-enter .28s ease forwards;
+}
+.cz-toast-success { border-left: 4px solid #43b879; }
+.cz-toast-error { border-left: 4px solid #e34d5b; }
+.cz-toast-icon {
+    flex: 0 0 25px;
+    width: 25px;
+    height: 25px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-weight: 800;
+    font-size: 14px;
+}
+.cz-toast-success .cz-toast-icon { color: #8ce0ae; background: rgba(67,184,121,.15); }
+.cz-toast-error .cz-toast-icon { color: #ff929b; background: rgba(227,77,91,.16); }
+.cz-toast.is-hiding { animation: cz-toast-exit .25s ease forwards; }
+@keyframes cz-toast-enter {
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes cz-toast-exit {
+    to { opacity: 0; transform: translateY(-10px); }
+}
+@media (max-width: 520px) {
+    .cz-toast-stack { top: 12px; right: 12px; width: calc(100vw - 24px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .cz-toast, .cz-toast.is-hiding { animation: none; opacity: 1; transform: none; }
+}
