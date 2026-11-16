@@ -28,4 +28,28 @@
             <button type="submit">Sign Out</button>
         </form>
     </nav>
+
+    <div class="cz-toast-stack" aria-live="polite" aria-atomic="true">
+        <div th:if="${successMessage}" class="cz-toast cz-toast-success" data-toast role="status">
+            <span class="cz-toast-icon" aria-hidden="true">✓</span>
+            <span th:text="${successMessage}">Operation completed successfully.</span>
+        </div>
+        <div th:if="${toastErrorMessage}" class="cz-toast cz-toast-error" data-toast role="alert">
+            <span class="cz-toast-icon" aria-hidden="true">!</span>
+            <span th:text="${toastErrorMessage}">Please try again.</span>
+        </div>
+        <div th:if="${param.error}" class="cz-toast cz-toast-error" data-toast role="alert">
+            <span class="cz-toast-icon" aria-hidden="true">!</span>
+            <span>Login failed. Check your email and password, then try again.</span>
+        </div>
+        <div th:if="${param.loginSuccess}" class="cz-toast cz-toast-success" data-toast role="status">
+            <span class="cz-toast-icon" aria-hidden="true">✓</span>
+            <span>Login successful. Welcome to CASEZERO!</span>
+        </div>
+        <div th:if="${param.logout}" class="cz-toast cz-toast-success" data-toast role="status">
+            <span class="cz-toast-icon" aria-hidden="true">✓</span>
+            <span>You have signed out successfully.</span>
+        </div>
+    </div>
+    <script th:src="@{/toast.js}" defer></script>
 </header>
