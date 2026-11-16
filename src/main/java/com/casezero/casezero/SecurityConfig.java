@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/members/**", "/community").permitAll()
                 .requestMatchers(
                         "/", "/signup", "/login", "/contact", "/research",
-                        "/cases/**", "/style.css", "/images/**", "/error"
+                        "/cases/**", "/style.css", "/toast.js", "/images/**", "/error"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .successHandler((request, response, authentication) -> {
                     boolean isAdmin = authentication.getAuthorities().stream()
                             .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
-                    response.sendRedirect(isAdmin ? "/admin" : "/");
+                    response.sendRedirect(isAdmin ? "/admin?loginSuccess" : "/?loginSuccess");
                 })
                 .failureUrl("/login?error")
                 .permitAll()

@@ -214,6 +214,7 @@ public class CasezeroController {
     public String register(
             @Valid @ModelAttribute("form") RegistrationForm form,
             BindingResult result,
+            Model model,
             RedirectAttributes redirectAttributes) {
 
         if (form.getPassword() != null
@@ -244,6 +245,7 @@ public class CasezeroController {
         }
 
         if (result.hasErrors()) {
+            model.addAttribute("toastErrorMessage", "Please correct the highlighted fields and try again.");
             return "signup";
         }
 
@@ -289,9 +291,11 @@ public class CasezeroController {
     public String submitContact(
             @Valid @ModelAttribute("form") ContactForm form,
             BindingResult result,
+            Model model,
             RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
+            model.addAttribute("toastErrorMessage", "Please correct the highlighted fields and try again.");
             return "contact";
         }
 
