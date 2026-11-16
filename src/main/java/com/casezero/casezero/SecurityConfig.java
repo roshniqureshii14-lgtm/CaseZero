@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/members/**", "/community").permitAll()
                 .requestMatchers(
                         "/", "/signup", "/login", "/contact", "/research",
-                        "/cases/**", "/style.css", "/images/**", "/error"
+                        "/cases/**", "/style.css", "/toast.js", "/images/**", "/error"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
